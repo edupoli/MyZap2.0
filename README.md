@@ -1,7 +1,4 @@
-<h1 align="center">
-    <a href="">🔗 MyZAP</a>
-</h1>
-<p align="center">🚀 Permite a integração do WhatsApp com qualquer aplicação por meio de requisições POST/GET</p>
+
 [![GitHub issues](https://img.shields.io/github/issues/edupoli/MyZap2.0)](https://github.com/edupoli/MyZap2.0/issues)
 [![GitHub forks](https://img.shields.io/github/forks/edupoli/MyZap2.0)](https://github.com/edupoli/MyZap2.0/network)
 [![GitHub stars](https://img.shields.io/github/stars/edupoli/MyZap2.0)](https://github.com/edupoli/MyZap2.0/stargazers)
