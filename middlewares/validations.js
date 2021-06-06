@@ -1,0 +1,44 @@
+const Sessions = require('../controllers/sessions')
+
+const checkParams = async (req, res, next) => {
+    let session = req.body.session
+    let data = Sessions.getSession(session)
+
+    if (!session) {
+        return res.status(401).json({ error: 'Sessão não informada.' });
+    }
+    else if (Sessions.session.length === 0) {
+        return res.status(503).json({
+            response: false,
+            status: "Service Unavailable",
+            message: 'O Serviço esta OffLine, indisponivel.'
+        })
+    }
+    else if (data.sessionkey != req.headers['sessionkey']) {
+        return res.status(401).json({
+            "result": 401,
+            "messages": "Não autorizado, verifique o token de sessão"
+        })
+    }
+    else {
+        const client = await data.client.isConnected();
+        if (!client) {
+            return res.status(400).json({
+                response: false,
+                status: "Disconnected",
+                message: 'A sessão do WhatsApp informada não está ativa.'
+            })
+        }
+        else {
+            next();
+        }
+    }
+}
+//checar se o numero existe no whats ...... isso no whatsappwebjs
+const checkRegisteredNumber = async function (req, res) {
+    let data = Sessions.getSession(req.body.session)
+    const isRegistered = await data.client.isRegisteredUser(req.body.number);
+    return isRegistered;
+}
+
+exports.checkParams = checkParams
