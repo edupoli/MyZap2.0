@@ -10,67 +10,90 @@ const fs = require('fs');
 const path = require('path');
 
 module.exports = class WhatsappWebJS {
-    static async start(session) {
+    static async start(req, res, session) {
+        console.log(`****** STARTING SESSION ${session} ******`)
+        const SESSION_FILE_PATH = path.resolve(`./tokens/${session}.data.json`);
+        let client;
+        let dataSession;
 
-        const SESSIONS_FILE = path.resolve(`./tokens/${session}.json`);
-        console.log('Creating session: ' + session);
-        let sessionCfg;
-        if (fs.existsSync(SESSIONS_FILE)) {
-            sessionCfg = require(SESSIONS_FILE);
-        }
-
-        const client = new Client({
-            restartOnAuthFail: true,
-            puppeteer: {
-                executablePath: chromeLauncher || null,
-                headless: true,
-                args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-accelerated-2d-canvas',
-                    '--no-first-run',
-                    '--no-zygote',
-                    '--single-process',
-                    '--disable-gpu'
-                ],
-            },
-            session: sessionCfg
-        });
-
-        client.on('qr', (qr) => {
-            console.log('QR RECEIVED', qr);
-            qrcode.generate(qr, { small: true });
-            qrcodeBase64.toDataURL(qr, (err, url) => {
-                webhooks.wh_qrcode(session, url)
-                //console.log(url)
+        const withSession = () => {
+            dataSession = require(SESSION_FILE_PATH);
+            client = new Client({
+                restartOnAuthFail: true,
+                puppeteer: {
+                    executablePath: chromeLauncher || null,
+                    headless: true,
+                    args: [
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox',
+                        '--disable-dev-shm-usage',
+                        '--disable-accelerated-2d-canvas',
+                        '--no-first-run',
+                        '--no-zygote',
+                        '--single-process',
+                        '--disable-gpu'
+                    ],
+                },
+                session: dataSession
             });
-        });
 
-        client.on('ready', () => {
-            console.log('READY... WhatsApp is ready');
-        });
-
-        client.on('authenticated', (session) => {
-            sessionCfg = session;
-            fs.writeFile(SESSIONS_FILE, JSON.stringify(session), function (err) {
-                if (err) {
-                    console.error(err);
-                }
+            client.on('ready', () => {
+                Sessions.addInfoSession(session, {
+                    session: session,
+                    client: client
+                })
+                req.io.emit('whatsapp-status', true);
+                console.log('READY... WhatsApp is ready');
             });
+            client.on('auth_failure', () => {
+                console.log('Auth failure, restarting...');
+                fs.unlinkSync(`./tokens/${session}.data.json`);
+            })
+            client.initialize();
             Sessions.addInfoSession(session, {
                 session: session,
                 client: client
             })
-        });
+        }
+
+        const withOutSession = () => {
+            client = new Client();
+            client.on('qr', (qr) => {
+                console.log('QR RECEIVED', qr);
+                qrcode.generate(qr, { small: true });
+                qrcodeBase64.toDataURL(qr, (err, url) => {
+                    webhooks.wh_qrcode(session, url)
+                    this.exportQR(req, res, url, session);
+                    Sessions.addInfoSession(session, {
+                        qrCode: url
+                    })
+                });
+            });
+            client.on('ready', () => {
+                console.log('READY... WhatsApp is ready');
+            });
+            client.on('auth_failure', () => {
+                console.log('Auth failure, restarting...');
+                fs.unlinkSync(`./tokens/${session}.data.json`);
+            })
+            client.on('authenticated', (session) => {
+                dataSession = session;
+                fs.writeFile(SESSION_FILE_PATH, JSON.stringify(session), (err) => {
+                    if (err) console.log(err);
+                });
+            });
+            client.initialize();
+            Sessions.addInfoSession(session, {
+                session: session,
+                client: client
+            })
+        }
+
+        (fs.existsSync(SESSION_FILE_PATH)) ? withSession() : withOutSession();
 
         client.on('change_state', (reason) => {
             console.log('Client was change state', reason);
             webhooks.wh_connect(session, reason)
-        });
-
-        client.on('auth_failure', function (session) {
-            console.log('Auth failure, restarting...');
         });
 
         client.on('disconnected', (reason) => {
@@ -93,7 +116,8 @@ module.exports = class WhatsappWebJS {
         })
 
         client.on('message_create', (message) => {
-            // Disparado em todas as criações de mensagem, incluindo a sua
+            //console.log(message)
+            // Disparado em todas as criações de mensagem, incluindo a sua => AQUI IREI DESENVOLVER O DISPARO PARA O WEBHOOK
             if (message.fromMe) {
                 // faça coisas aqui, pode ser disparado um webhook por exemplo
             }
@@ -101,9 +125,9 @@ module.exports = class WhatsappWebJS {
 
         client.on('message_revoke_everyone', async (after, before) => {
             // Disparado sempre que uma mensagem é excluída por alguém (incluindo você)
-            console.log(after); // mensagem depois de ser excluída.
+            //console.log(after); // mensagem depois de ser excluída.
             if (before) {
-                console.log(before); // mensagem antes de ser excluída.
+                //console.log(before); // mensagem antes de ser excluída.
             }
         });
 
@@ -111,7 +135,16 @@ module.exports = class WhatsappWebJS {
             // Disparado sempre que uma mensagem é excluída apenas em sua própria visualização.
             console.log(message.body); // mensagem antes de ser excluída.
         });
-        client.initialize();
+    }
+    static async exportQR(req, res, qrCode, session) {
+        qrCode = qrCode.replace('data:image/png;base64,', '');
+        const imageBuffer = Buffer.from(qrCode, 'base64');
+        req.io.emit('qrCode',
+            {
+                data: 'data:image/png;base64,' + imageBuffer.toString('base64'),
+                session: session
+            }
+        );
     }
 }
 

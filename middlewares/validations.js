@@ -1,9 +1,10 @@
 const Sessions = require('../controllers/sessions')
+require('dotenv').config();
+let engine = process.env.ENGINE;
 
 const checkParams = async (req, res, next) => {
     let session = req.body.session
     let data = Sessions.getSession(session)
-
     if (!session) {
         return res.status(401).json({ error: 'Sessão não informada.' });
     }
@@ -21,16 +22,31 @@ const checkParams = async (req, res, next) => {
         })
     }
     else {
-        const client = await data.client.isConnected();
-        if (!client) {
-            return res.status(400).json({
-                response: false,
-                status: "Disconnected",
-                message: 'A sessão do WhatsApp informada não está ativa.'
-            })
+        if (engine === '1') {
+            //const client = await data.client.isOnline();
+            if (!data.client) {
+                return res.status(400).json({
+                    response: false,
+                    status: "Disconnected",
+                    message: 'A sessão do WhatsApp informada não está ativa.'
+                })
+            }
+            else {
+                next();
+            }
         }
         else {
-            next();
+            const client = await data.client.isConnected();
+            if (!client) {
+                return res.status(400).json({
+                    response: false,
+                    status: "Disconnected",
+                    message: 'A sessão do WhatsApp informada não está ativa.'
+                })
+            }
+            else {
+                next();
+            }
         }
     }
 }

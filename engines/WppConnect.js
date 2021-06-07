@@ -47,9 +47,15 @@ module.exports = class Wppconnect {
                         statusSession === 'serverClose') {
                         req.io.emit('whatsapp-status', false)
                     }
+                    if (statusSession === 'isLogged' ||
+                        statusSession === 'qrReadSuccess' ||
+                        statusSession === 'chatsAvailable' ||
+                        statusSession === 'inChat') {
+                        req.io.emit('whatsapp-status', true)
+                    }
 
                 },
-                headless: false,
+                headless: true,
                 logQR: true,
                 browserWS: '', //browserless !=  '' ? browserless.replace('https://', 'wss://')+'?token='+token_browser : '',
                 useChrome: true,

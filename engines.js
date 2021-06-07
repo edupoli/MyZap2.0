@@ -1,3 +1,9 @@
+/*
+ * @Author: Eduardo Policarpo
+ * @contact: +55 43996611437
+ * @Date: 2021-05-20 18:05:16
+ * @LastEditTime: 2021-06-07 03:18:22
+ */
 var engines = {
     1: {
         descricao: "Engine Whatsapp-Web-JS",

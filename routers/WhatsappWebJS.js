@@ -3,51 +3,85 @@ const Router = express.Router();
 const engine = require('../engines/WhatsappWebJS');
 const Sessions = require('../controllers/sessions');
 const Mensagens = require('../functions/WhatsappWebJS/mensagens');
+const Status = require('../functions/WhatsappWebJS/status');
+const secret = require('../key/secret');
+const { checkParams } = require('../middlewares/validations');
+const { checkNumber } = require('../middlewares/checkNumber');
 
 Router.post('/start', async (req, res) => {
 
-    let session = req.body.session
-    let existSession = Sessions.checkSession(session)
-    if (!existSession) {
-        Sessions.checkAddUser(session)
-        Sessions.addInfoSession(session, {
-            webhook: req.body.webhook,
-            wa_browser_id: req.headers['wa_browser_id'] ? req.headers['wa_browser_id'] : '',
-            wa_secret_bundle: req.headers['wa_secret_bundle'] ? req.headers['wa_secret_bundle'] : '',
-            wa_token_1: req.headers['wa_token_1'] ? req.headers['wa_token_1'] : '',
-            wa_token_2: req.headers['wa_token_2'] ? req.headers['wa_token_2'] : '',
-        })
-        engine.start(session).then(response => {
+    if (req.headers['apitoken'] === secret) {
+        let session = req.body.session
+        let existSession = Sessions.checkSession(session)
+        if (!existSession) {
+            init(session)
+        }
+        if (existSession) {
+            let data = Sessions.getSession(session)
+            if (data.status !== 'inChat' && data.status !== 'isLogged') {
+                init(session)
+            }
+            else {
+                res.status(400).json({
+                    result: 400,
+                    "status": "FAIL",
+                    "reason": "there is already a session with that name",
+                    "status": data.status
+                })
+            }
+        }
+
+        async function init(session) {
+            Sessions.checkAddUser(session)
             Sessions.addInfoSession(session, {
-                client: response,
+                apitoken: req.headers['apitoken'],
+                sessionkey: req.headers['sessionkey'],
+                wh_status: req.body.wh_status,
+                wh_message: req.body.wh_message,
+                wh_qrcode: req.body.wh_qrcode,
+                wh_connect: req.body.wh_connect,
+                wa_browser_id: req.headers['wa_browser_id'] ? req.headers['wa_browser_id'] : '',
+                wa_secret_bundle: req.headers['wa_secret_bundle'] ? req.headers['wa_secret_bundle'] : '',
+                wa_token_1: req.headers['wa_token_1'] ? req.headers['wa_token_1'] : '',
+                wa_token_2: req.headers['wa_token_2'] ? req.headers['wa_token_2'] : '',
             })
+
+            let response = await engine.start(req, res, session)
+
             res.status(200).json({
                 "result": 200,
-                "status": "CONNECTING"
+                "status": "CONNECTED"
             })
-        })
+        }
     }
     else {
-        res.status(400).json({
+        req.io.emit('msg', {
             result: 400,
             "status": "FAIL",
-            "reason": "there is already a session with that name"
+            "reason": "Unauthorized, please check the API TOKEN"
+        })
+        res.status(401).json({
+            result: 401,
+            "status": "FAIL",
+            "reason": "Unauthorized, please check the API TOKEN"
         })
     }
+
 })
 
 // Mensagens
-Router.post('/sendText', Mensagens.sendText);
-Router.post('/sendImage', Mensagens.sendImage);
-Router.post('/sendVideo', Mensagens.sendVideo);
-Router.post('/sendSticker', Mensagens.sendSticker);
-Router.post('/sendFile', Mensagens.sendFile);
+Router.post('/sendText', checkParams, checkNumber, Mensagens.sendText);
+Router.post('/sendImage', checkNumber, Mensagens.sendImage);
+Router.post('/sendVideo', checkNumber, Mensagens.sendVideo);
+Router.post('/sendSticker', checkNumber, Mensagens.sendSticker);
+Router.post('/sendFile', checkNumber, Mensagens.sendFile);
 // Router.post('/sendFile64', Mensagens.sendFile64);
 Router.post('/sendAudio', Mensagens.sendAudio);
 // Router.post('/sendVoiceBase64', Mensagens.sendVoiceBase64);
-// Router.post('/sendLink', Mensagens.sendLink);
-// Router.post('/sendContact', Mensagens.sendContact);
-// Router.post('/sendLocation', Mensagens.sendLocation);
+Router.post('/sendLink', checkNumber, Mensagens.sendLink);
+Router.post('/sendContact', checkNumber, Mensagens.sendContact);
+Router.post('/sendLocation', checkNumber, Mensagens.sendLocation);
+
 // // Grupos
 // Router.post('/getAllGroups', Groups.getAllGroups);
 // Router.post('/joinGroup', Groups.joinGroup);
@@ -61,10 +95,12 @@ Router.post('/sendAudio', Mensagens.sendAudio);
 // Router.post('/getGroupAdmins', Groups.getGroupAdmins);
 // Router.post('/getGroupInviteLink', Groups.getGroupInviteLink);
 // Router.post('/setGroupPic', Groups.setGroupPic);
+
 // // Status
-// Router.post('/addStatusText', Status.addStatusText);
-// Router.post('/addStatusImage', Status.addStatusImage);
-// Router.post('/addStatusVideo', Status.addStatusVideo);
+Router.post('/sendTextToStorie', Status.sendTextToStorie);
+//Router.post('/sendImageToStorie', Status.sendImageToStorie);
+//Router.post('/sendVideoToStorie', Status.sendVideoToStorie);
+
 // // Dispositivo, chats entre outras
 // Router.post('/getBatteryLevel', Commands.getBatteryLevel);
 // Router.post('/getConnectionState', Commands.getConnectionState);
