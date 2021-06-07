@@ -1,3 +1,9 @@
+/*
+ * @Author: Eduardo Policarpo
+ * @contact: +55 43996611437
+ * @Date: 2021-05-10 18:09:49
+ * @LastEditTime: 2021-06-07 03:18:01
+ */
 const { Client } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const qrcodeBase64 = require('qrcode');
