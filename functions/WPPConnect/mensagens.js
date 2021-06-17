@@ -580,4 +580,31 @@ module.exports = class Mensagens {
             }
         }
     }
+
+    static async getOrderByMsg(req, res) {
+        let data = Sessions.getSession(req.body.session)
+        if (!req.body.messageid) {
+            return res.status(400).json({
+                status: 400,
+                error: "MessageID não foi informado, é obrigatorio"
+            })
+        }
+        else {
+            try {
+                let response = await data.client.getOrderbyMsg(req.body.messageid);
+                return res.status(200).json({
+                    result: 200,
+                    type: 'order',
+                    data: response
+                })
+
+            } catch (error) {
+                return res.status(200).json({
+                    "result": 400,
+                    "status": "FAIL",
+                    "error": error
+                })
+            }
+        }
+    }
 }
