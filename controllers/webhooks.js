@@ -14,19 +14,18 @@ module.exports = class Webhooks {
     static async wh_messages(session, response) {
         let data = Sessions.getSession(session)
         try {
-
-            await superagent
-                .post(data.wh_message)
-                .send(response)
-                .queue('messages')
-                .end(function () {
-                    console.log('webhooks receive message....')
-                });
-            if (data.wh_message == '') {
-                console.log('Webhook no defined')
+            if (data.wh_message != undefined) {
+                await superagent
+                    .post(data.wh_message)
+                    .send(response)
+                    .queue('messages')
+                    .end(function () {
+                        console.log('webhooks receive message....')
+                    });
+                if (data.wh_message == '') {
+                    console.log('Webhook no defined')
+                }
             }
-
-
         } catch (error) {
             console.log(error)
         }
@@ -57,39 +56,41 @@ module.exports = class Webhooks {
                     'status': response
                 }
             }
-
-            await superagent
-                .post(data.wh_connect)
-                .send(object)
-                .queue('connection')
-                .end(function () {
-                    console.log('webhooks connect status....')
-                });
-            if (data.wh_connect == '') {
-                console.log('Webhook no defined')
+            if (data.wh_connect != undefined) {
+                await superagent
+                    .post(data.wh_connect)
+                    .send(object)
+                    .queue('connection')
+                    .end(function () {
+                        console.log('webhooks connect status....')
+                    });
+                if (data.wh_connect == '') {
+                    console.log('Webhook no defined')
+                }
             }
 
         } catch (error) {
             console.log(error)
         }
 
-
     }
 
     static async wh_status(session, response) {
         let data = Sessions.getSession(session)
         try {
-
-            await superagent
-                .post(data.wh_status)
-                .send(response)
-                .queue('status')
-                .end(function () {
-                    console.log('webhooks status message....')
-                });
-            if (data.wh_status == '') {
-                console.log('Webhook no defined')
+            if (data.wh_status != undefined) {
+                await superagent
+                    .post(data.wh_status)
+                    .send(response)
+                    .queue('status')
+                    .end(function () {
+                        console.log('webhooks status message....')
+                    });
+                if (data.wh_status == '') {
+                    console.log('Webhook no defined')
+                }
             }
+
         } catch (error) {
             console.log(error)
         }
@@ -104,17 +105,19 @@ module.exports = class Webhooks {
                 'session': session,
                 'qrcode': response
             }
-
-            await superagent
-                .post(data.wh_qrcode)
-                .send(object)
-                .queue('qrcode')
-                .end(function () {
-                    console.log('webhooks status message....')
-                });
-            if (data.wh_qrcode == '') {
-                console.log('Webhook no defined')
+            if (data.wh_qrcode != undefined) {
+                await superagent
+                    .post(data.wh_qrcode)
+                    .send(object)
+                    .queue('qrcode')
+                    .end(function () {
+                        console.log('webhooks status message....')
+                    });
+                if (data.wh_qrcode == '') {
+                    console.log('Webhook no defined')
+                }
             }
+
         } catch (error) {
             console.log(error)
         }
