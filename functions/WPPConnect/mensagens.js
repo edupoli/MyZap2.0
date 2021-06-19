@@ -28,8 +28,10 @@ module.exports = class Mensagens {
                 return res.status(200).json({
                     result: 200,
                     type: 'text',
-                    id: response.chatId._serialized,
-                    phone: response.chatId.user,
+                    session: req.body.session,
+                    messageId: response.id,
+                    from: response.from.split('@')[0],
+                    to: response.chatId.user,
                     content: response.content
                 })
             } catch (error) {
@@ -58,9 +60,10 @@ module.exports = class Mensagens {
             return res.status(200).json({
                 result: 200,
                 type: 'image',
-                id: response.to._serialized,
+                messageId: response.id,
                 session: req.body.session,
-                phone: response.to.user,
+                from: response.from.split('@')[0],
+                to: response.to.user,
                 file: req.body.url,
                 mimetype: response.mimeType,
 
@@ -97,8 +100,9 @@ module.exports = class Mensagens {
                     result: 200,
                     type: 'video',
                     session: req.body.session,
-                    id: response.to._serialized,
-                    phone: response.to.user,
+                    messageId: response.id,
+                    from: response.from.split('@')[0],
+                    to: response.to.user,
                     file: name,
                     content: response.content,
                     mimetype: response.mimeType
@@ -112,8 +116,9 @@ module.exports = class Mensagens {
                     result: 200,
                     type: 'video',
                     session: req.body.session,
-                    id: response.to._serialized,
-                    phone: response.to.user,
+                    messageId: response.id,
+                    from: response.from.split('@')[0],
+                    to: response.to.user,
                     file: name,
                     content: response.content,
                     mimetype: response.mimeType
@@ -150,9 +155,10 @@ module.exports = class Mensagens {
                 return res.status(200).json({
                     result: 200,
                     type: 'sticker',
-                    id: response.to._serialized,
+                    messageId: response.id,
                     session: req.body.session,
-                    phone: response.to.user,
+                    from: response.from.split('@')[0],
+                    to: response.to.user,
                     file: name,
                     content: response.content,
                     mimetype: response.mimeType
@@ -163,9 +169,10 @@ module.exports = class Mensagens {
                 return res.status(200).json({
                     result: 200,
                     type: 'sticker',
-                    id: response.to._serialized,
+                    messageId: response.id,
                     session: req.body.session,
-                    phone: response.to.user,
+                    from: response.from.split('@')[0],
+                    to: response.to.user,
                     file: name,
                     content: response.content,
                     mimetype: response.mimeType
@@ -204,9 +211,10 @@ module.exports = class Mensagens {
                 return res.status(200).json({
                     result: 200,
                     type: 'file',
-                    id: response.to._serialized,
+                    messageId: response.id,
                     session: req.body.session,
-                    phone: response.to.user,
+                    from: response.from.split('@')[0],
+                    to: response.to.user,
                     file: name,
                     content: response.content,
                     mimetype: response.mimeType
@@ -217,9 +225,10 @@ module.exports = class Mensagens {
                 return res.status(200).json({
                     result: 200,
                     type: 'file',
-                    id: response.to._serialized,
+                    messageId: response.id,
                     session: req.body.session,
-                    phone: response.to.user,
+                    from: response.from.split('@')[0],
+                    to: response.to.user,
                     file: name,
                     content: response.content,
                     mimetype: response.mimeType
@@ -249,9 +258,10 @@ module.exports = class Mensagens {
             return res.status(200).json({
                 result: 200,
                 type: 'file',
-                id: response.chatId._serialized,
+                messageId: response.id,
                 session: req.body.session,
-                phone: response.chatId.user,
+                from: response.from.split('@')[0],
+                to: response.chatId.user,
                 file: name,
                 content: response.content,
                 mimetype: response.mimeType
@@ -295,9 +305,10 @@ module.exports = class Mensagens {
                     return res.status(200).json({
                         result: 200,
                         type: 'ptt',
-                        id: response.to._serialized,
+                        messageId: response.id,
                         session: req.body.session,
-                        phone: response.to.user,
+                        from: response.from.split('@')[0],
+                        to: response.to.user,
                         file: file,
                         content: response.content,
                         mimetype: response.mimeType
@@ -329,9 +340,10 @@ module.exports = class Mensagens {
                     return res.status(200).json({
                         result: 200,
                         type: 'ptt',
-                        id: response.to._serialized,
+                        messageId: response.id,
                         session: req.body.session,
-                        phone: response.to.user,
+                        from: response.from.split('@')[0],
+                        to: response.to.user,
                         file: file,
                         content: response.content,
                         mimetype: response.mimeType
@@ -377,9 +389,10 @@ module.exports = class Mensagens {
                 return res.status(200).json({
                     result: 200,
                     type: 'audio',
-                    id: response.chatId._serialized,
+                    messageId: response.id,
                     session: req.body.session,
-                    phone: response.chatId.user,
+                    from: response.from.split('@')[0],
+                    to: response.chatId.user,
                     file: 'audio',
                     content: response.content,
                     mimetype: response.mimeType
@@ -411,9 +424,10 @@ module.exports = class Mensagens {
                 return res.status(200).json({
                     result: 200,
                     type: 'link',
-                    id: response.to._serialized,
+                    messageId: response.id,
                     session: req.body.session,
-                    phone: response.to.user,
+                    from: response.from.split('@')[0],
+                    to: response.to.user,
                     content: response.content
                 })
             } catch (error) {
@@ -447,9 +461,10 @@ module.exports = class Mensagens {
                 return res.status(200).json({
                     result: 200,
                     type: 'contact',
-                    id: response.to._serialized,
+                    messageId: response.id,
                     session: req.body.session,
-                    phone: response.to.user,
+                    from: response.from.split('@')[0],
+                    to: response.to.user,
                     content: response.content
                 })
             } catch (error) {
@@ -495,9 +510,10 @@ module.exports = class Mensagens {
                 return res.status(200).json({
                     result: 200,
                     type: 'locate',
-                    id: response.to._serialized,
+                    messageId: response.id,
                     session: req.body.session,
-                    phone: response.to.user,
+                    from: response.from.split('@')[0],
+                    to: response.to.user,
                     content: response.content
                 })
             } catch (error) {
@@ -531,8 +547,10 @@ module.exports = class Mensagens {
                 return res.status(200).json({
                     result: 200,
                     type: 'text',
-                    id: response.id,
-                    phone: response.chat.id.user,
+                    session: req.body.session,
+                    messageId: response.id,
+                    from: response.from.split('@')[0],
+                    to: response.chat.id.user,
                     content: response.content
                 })
             } catch (error) {
@@ -566,9 +584,10 @@ module.exports = class Mensagens {
                 return res.status(200).json({
                     result: 200,
                     type: 'forward',
-                    id: response.to._serialized,
+                    messageId: response.id,
                     session: req.body.session,
-                    phone: response.to.user,
+                    from: response.from.split('@')[0],
+                    to: response.to.user,
                 })
 
             } catch (error) {
@@ -581,7 +600,7 @@ module.exports = class Mensagens {
         }
     }
 
-    static async getOrderByMsg(req, res) {
+    static async getOrderbyMsg(req, res) {
         let data = Sessions.getSession(req.body.session)
         if (!req.body.messageid) {
             return res.status(400).json({
@@ -595,6 +614,7 @@ module.exports = class Mensagens {
                 return res.status(200).json({
                     result: 200,
                     type: 'order',
+                    session: req.body.session,
                     data: response
                 })
 

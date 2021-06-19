@@ -52,7 +52,7 @@ module.exports = class Commands {
       console.log(response)
       return res.status(200).json({
         "result": 200,
-        "number": response.id.user,
+        "number": response.wid.user,
         "connected": response.connected,
         "phone": response.phone,
         "plataform": response.plataform,

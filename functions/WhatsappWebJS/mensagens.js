@@ -459,7 +459,7 @@ module.exports = class Mensagens {
                 return res.status(200).json({
                     result: 200,
                     type: 'contact',
-                    id: response.to._serialized,
+                    messageId: response.id,
                     session: req.body.session,
                     phone: response.to.user,
                     content: response.content
@@ -490,7 +490,7 @@ module.exports = class Mensagens {
                 return res.status(200).json({
                     result: 200,
                     type: 'link',
-                    id: response.to._serialized,
+                    messageId: response.id,
                     session: req.body.session,
                     phone: response.to.user,
                     content: response.content

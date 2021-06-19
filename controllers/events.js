@@ -20,6 +20,7 @@ module.exports = class Events {
             } else if (type == 'chat' && !message.subtype) {
                 type = 'text'
             }
+
             let response = []
             if (message.isMedia === true || message.isMMS === true || message.type == 'document' || message.type == 'ptt' || message.type == 'sticker') {
                 var buffer = await client.decryptFile(message);
@@ -35,6 +36,7 @@ module.exports = class Events {
                         "session": session,
                         "isGroupMsg": message.isGroupMsg,
                         "author": message.author ? message.author : null,
+                        "sender": message.to.split('@')[0],
                         "phone": message.from.split('@')[0],
                         "content": message.body,
                         "status": "RECEIVED",
@@ -54,6 +56,7 @@ module.exports = class Events {
                         "session": session,
                         "isGroupMsg": message.isGroupMsg,
                         "author": message.author ? message.author : null,
+                        "sender": message.to.split('@')[0],
                         "phone": message.from.split('@')[0],
                         "content": message.body,
                         "caption": message.caption != undefined ? message.caption : "",
@@ -74,6 +77,7 @@ module.exports = class Events {
                         "session": session,
                         "isGroupMsg": message.isGroupMsg,
                         "author": message.author ? message.author : null,
+                        "sender": message.to.split('@')[0],
                         "phone": message.from.split('@')[0],
                         "content": message.body,
                         "caption": message.caption != undefined ? message.caption : "",
@@ -95,6 +99,7 @@ module.exports = class Events {
                         "session": session,
                         "isGroupMsg": message.isGroupMsg,
                         "author": message.author ? message.author : null,
+                        "sender": message.to.split('@')[0],
                         "phone": message.from.split('@')[0],
                         "mimetype": message.mimetype,
                         "file": fileName.split('/')[1],
@@ -114,6 +119,7 @@ module.exports = class Events {
                         "session": session,
                         "isGroupMsg": message.isGroupMsg,
                         "author": message.author ? message.author : null,
+                        "sender": message.to.split('@')[0],
                         "phone": message.from.split('@')[0],
                         "mimetype": message.mimetype,
                         "file": fileName.split('/')[1],
@@ -133,6 +139,7 @@ module.exports = class Events {
                         "session": session,
                         "isGroupMsg": message.isGroupMsg,
                         "author": message.author ? message.author : null,
+                        "sender": message.to.split('@')[0],
                         "phone": message.from.split('@')[0],
                         "content": message.body,
                         "caption": message.caption != undefined ? message.caption : "",
@@ -151,6 +158,7 @@ module.exports = class Events {
                         "session": session,
                         "isGroupMsg": message.isGroupMsg,
                         "author": message.author ? message.author : null,
+                        "sender": message.to.split('@')[0],
                         "phone": message.from.split('@')[0],
                         "content": message.body,
                         "loc": message.loc,
@@ -173,6 +181,7 @@ module.exports = class Events {
                         "session": session,
                         "isGroupMsg": message.isGroupMsg,
                         "author": message.author ? message.author : null,
+                        "sender": message.to.split('@')[0],
                         "phone": message.from.split('@')[0],
                         "mimetype": message.mimetype,
                         "caption": message.caption != undefined ? message.caption : "",
@@ -191,6 +200,7 @@ module.exports = class Events {
                         "session": session,
                         "isGroupMsg": message.isGroupMsg,
                         "author": message.author ? message.author : null,
+                        "sender": message.to.split('@')[0],
                         "phone": message.from.split('@')[0],
                         "thumbnail": message.thumbnail,
                         "title": message.title,
@@ -209,9 +219,27 @@ module.exports = class Events {
                         "session": session,
                         "isGroupMsg": message.isGroupMsg,
                         "author": message.author ? message.author : null,
+                        "sender": message.to.split('@')[0],
                         "phone": message.from.split('@')[0],
                         "contactName": message.vcardFormattedName,
                         "contactVcard": message.body,
+                        "status": "RECEIVED",
+                        "timestamp": message.timestamp,
+                    }
+
+                    break;
+
+                case 'order':
+                    response = {
+                        "wook": 'RECEIVE_MESSAGE',
+                        "type": 'order',
+                        "id": message.id,
+                        "session": session,
+                        "isGroupMsg": message.isGroupMsg,
+                        "author": message.author ? message.author : null,
+                        "sender": message.to.split('@')[0],
+                        "phone": message.from.split('@')[0],
+                        "content": '',
                         "status": "RECEIVED",
                         "timestamp": message.timestamp,
                     }

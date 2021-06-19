@@ -101,7 +101,7 @@ Router.post('/sendLocation', checkParams, checkNumber, Mensagens.sendLocation);
 Router.post('/reply', checkParams, Mensagens.reply);
 Router.post('/forwardMessages', checkParams, Mensagens.forwardMessages);
 Router.post('/getMessagesChat', checkParams, checkNumber, Commands.getMessagesChat);
-Router.post('/getOrderByMsg', checkParams, Mensagens.getOrderByMsg);
+Router.post('/getOrderbyMsg', checkParams, Mensagens.getOrderbyMsg);
 
 // // Grupos
 Router.post('/getAllGroups', checkParams, Groups.getAllGroups);
