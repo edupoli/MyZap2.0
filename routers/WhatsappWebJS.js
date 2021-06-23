@@ -10,13 +10,13 @@ const engine = require('../engines/WhatsappWebJS');
 const Sessions = require('../controllers/sessions');
 const Mensagens = require('../functions/WhatsappWebJS/mensagens');
 const Status = require('../functions/WhatsappWebJS/status');
-const secret = require('../key/secret');
+const config = require('../config');
 const { checkParams } = require('../middlewares/validations');
 const { checkNumber } = require('../middlewares/checkNumber');
 
 Router.post('/start', async (req, res) => {
 
-    if (req.headers['apitoken'] === secret) {
+    if (req.headers['apitoken'] === config.token) {
         let session = req.body.session
         let existSession = Sessions.checkSession(session)
         if (!existSession) {

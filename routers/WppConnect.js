@@ -13,14 +13,17 @@ const Commands = require('../functions/WPPConnect/commands');
 const Groups = require('../functions/WPPConnect/groups');
 const Mensagens = require('../functions/WPPConnect/mensagens');
 const Auth = require('../functions/WPPConnect/auth');
-const secret = require('../key/secret');
+const config = require('../config');
 const { checkParams } = require('../middlewares/validations');
 const { checkNumber } = require('../middlewares/checkNumber');
-
+const database = require('../firebase/functions');
+const firebase = require('../firebase/db');
+const SessionsDB = require('../firebase/model');
+const firestore = firebase.firestore();
 
 Router.post('/start', async (req, res) => {
 
-    if (req.headers['apitoken'] === secret) {
+    if (req.headers['apitoken'] === config.token) {
         let session = req.body.session
         let existSession = Sessions.checkSession(session)
         if (!existSession) {
@@ -58,10 +61,26 @@ Router.post('/start', async (req, res) => {
 
             let response = await engine.start(req, res, session)
 
+            let data = {
+                'session': session,
+                'apitoken': req.headers['apitoken'],
+                'wh_status': req.body.wh_status,
+                'wh_message': req.body.wh_message,
+                'wh_qrcode': req.body.wh_qrcode,
+                'wh_connect': req.body.wh_connect,
+                'WABrowserId': response.WABrowserId,
+                'WASecretBundle': response.WASecretBundle,
+                'WAToken1': response.WAToken1,
+                'WAToken2': response.WAToken2
+            }
+            await firestore.collection('Sessions').doc().set(data);
+
             res.status(200).json({
                 "result": 200,
-                "status": "CONNECTED"
+                "status": "CONNECTED",
+                "response": 'Sessão gravada com sucesso no Firebase'
             })
+
         }
     }
     else {
@@ -79,6 +98,10 @@ Router.post('/start', async (req, res) => {
 
 })
 
+Router.post('/addSession', database.addSession);
+Router.post('/getAllSessions', database.getAllSessions);
+Router.post('/getSession', database.getSession);
+Router.post('/updateSession', database.updateSession);
 // Sessões 
 Router.post('/logout', checkParams, Auth.logoutSession); //ok
 Router.post('/close', checkParams, Auth.closeSession); //ok

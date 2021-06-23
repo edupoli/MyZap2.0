@@ -13,14 +13,14 @@ const Commands = require('../functions/Venom/commands');
 const Groups = require('../functions/Venom/groups');
 const Mensagens = require('../functions/Venom/mensagens');
 const Auth = require('../functions/WPPConnect/auth');
-const secret = require('../key/secret');
+const config = require('../config');
 const { checkParams } = require('../middlewares/validations');
 const { checkNumber } = require('../middlewares/checkNumber');
 
 
 Router.post('/start', async (req, res) => {
 
-    if (req.headers['apitoken'] === secret) {
+    if (req.headers['apitoken'] === config.token) {
         let session = req.body.session
         let existSession = Sessions.checkSession(session)
         if (!existSession) {

@@ -12,7 +12,8 @@ const path = require('path')
 const server = require('http').Server(app);
 const serveIndex = require('serve-index');
 const motor = require('./engines');
-require('dotenv').config();
+const config = require('./config');
+const { yo } = require('yoo-hoo');
 const router = motor.engines[process.env.ENGINE].router
 
 const io = require('socket.io')(server, {
@@ -39,7 +40,6 @@ app.use((req, res, next) => {
     next();
 });
 
-
 app.use(router);
 
 io.on('connection', sock => {
@@ -55,22 +55,31 @@ io.on('connection', sock => {
 });
 
 app.get('/start', function (req, res) {
-    res.render('index', { port: appPort })
+    res.render('index', { port: config.port, host: config.host })
 });
 
-var appPort = process.env.HOST_PORT ? process.env.HOST_PORT : 3000;
-
-if (process.env.HTTPS == 1) {
+if (config.https == 1) {
     https.createServer(
         {
-            key: fs.readFileSync(process.env.SSL_KEY_PATH),
-            cert: fs.readFileSync(process.env.SSL_CERT_PATH)
+            key: fs.readFileSync(config.ssl_key_path),
+            cert: fs.readFileSync(config.ssl_cert_path)
         },
-        server).listen(appPort);
-    console.log("Https server running on port " + appPort);
+        server).listen(config.port, () => {
+            console.log('\n\nWelcome to')
+            yo('MyZAP', {
+                color: 'rainbow',
+                spacing: 1,
+            });
+            console.log(`Http server running on ${config.host}:${config.port}`);
+        });
 } else {
-    server.listen(appPort, () => {
-        console.log("Http server running on port " + appPort);
+    server.listen(config.port, () => {
+        console.log('\n\nWelcome to')
+        yo('MyZAP', {
+            color: 'rainbow',
+            spacing: 1,
+        });
+        console.log(`Http server running on ${config.host}:${config.port}`);
     });
 }
 

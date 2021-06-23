@@ -117,7 +117,7 @@ module.exports = class Wppconnect {
                 client: client,
                 tokens: tokens
             })
-            return client;
+            return client, tokens;
         } catch (error) {
             console.log(error)
         }
