@@ -73,7 +73,7 @@ Router.post('/start', async (req, res) => {
                 'WAToken1': response.WAToken1,
                 'WAToken2': response.WAToken2
             }
-            await firestore.collection('Sessions').doc().set(data);
+            await firestore.collection('Sessions').doc(session).set(data);
 
             res.status(200).json({
                 "result": 200,

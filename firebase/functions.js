@@ -1,9 +1,9 @@
 /*##############################################################################
 # File: functions.js                                                           #
-# Project: MyZap2.0                                                            #
+# Project: myzap2.0                                                            #
 # Created Date: 2021-06-21 18:41:44                                            #
 # Author: Eduardo Policarpo                                                    #
-# Last Modified: 2021-06-22 09:09:26                                           #
+# Last Modified: 2021-06-23 10:15:16                                           #
 # Modified By: Eduardo Policarpo                                               #
 ##############################################################################*/
 
@@ -18,7 +18,7 @@ module.exports = class Firebase {
     static async addSession(req, res, next) {
         try {
             const data = req.body;
-            await firestore.collection('Sessions').doc().set(data);
+            await firestore.collection('Sessions').doc(req.body.session).set(data);
             res.send('Record saved successfuly');
         } catch (error) {
             res.status(400).send(error.message);
@@ -57,7 +57,7 @@ module.exports = class Firebase {
         }
     }
 
-    static async getSessionById(req, res, next) {
+    static async getSession(req, res, next) {
         try {
             const id = req.body.id;
             const Session = await firestore.collection('Sessions').doc(id);
@@ -72,44 +72,13 @@ module.exports = class Firebase {
         }
     }
 
-    static async getSession(req, res, next) {
-        try {
-
-            const Session = firestore.collection('Sessions');
-            const data = await Session.where('nome', '==', req.body.nome).get();
-            if (data.empty) {
-                console.log('No matching documents.');
-                return;
-            }
-            data.forEach(doc => {
-                res.send(doc.data())
-            });
-
-        } catch (error) {
-            res.status(400).send(error.message);
-        }
-    }
-
-    static async updateSessionById(req, res, next) {
+    static async updateSession(req, res, next) {
         try {
             const id = req.params.id;
             const data = req.body;
             const Session = await firestore.collection('Sessions').doc(id);
             await Session.update(data);
             res.send('Session record updated successfuly');
-        } catch (error) {
-            res.status(400).send(error.message);
-        }
-    }
-
-    static async updateSession(req, res, next) {
-        try {
-            const Session = firestore.collection('Sessions')
-            const data = await Session.where('nome', '==', req.body.nome).get();
-            const dados = req.body;
-
-            //await data.update(dados);
-            res.send(data, 'Session record updated successfuly');
         } catch (error) {
             res.status(400).send(error.message);
         }

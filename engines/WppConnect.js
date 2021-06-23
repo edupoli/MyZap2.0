@@ -9,6 +9,8 @@ const Sessions = require('../controllers/sessions');
 require('dotenv').config();
 const events = require('../controllers/events');
 const webhooks = require('../controllers/webhooks');
+const firebase = require('../firebase/db');
+const firestore = firebase.firestore();
 
 const myTokenStore = new wppconnect.tokenStore.FileTokenStore({
     decodeFunction: JSON.parse,
@@ -26,6 +28,7 @@ module.exports = class Wppconnect {
     static async start(req, res, session) {
 
         const data = Sessions.getSession(session)
+        let token = await this.getToken(session);
 
         try {
             const client = await wppconnect.create({
@@ -97,11 +100,15 @@ module.exports = class Wppconnect {
                     '--disable-app-list-dismiss-on-blur',
                     '--disable-accelerated-video-decode',
                 ],
-                createPathFileToken: true,
-                WABrowserId: data.wa_browser_id,
-                WASecretBundle: data.wa_secret_bundle,
-                WAToken1: data.wa_token_1,
-                WAToken2: data.wa_token_2,
+
+                createPathFileToken: false,
+                sessionToken: {
+                    WABrowserId: token.WABrowserId,
+                    WASecretBundle: token.WASecretBundle,
+                    WAToken1: token.WAToken1,
+                    WAToken2: token.WAToken2,
+                }
+
             })
 
             wppconnect.defaultLogger.level = 'silly';
@@ -141,5 +148,23 @@ module.exports = class Wppconnect {
                 session: session
             }
         );
+    }
+
+    static async getToken(session) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const Session = await firestore.collection('Sessions').doc(session);
+                const dados = await Session.get();
+                let data = {
+                    'WABrowserId': dados.data().WABrowserId,
+                    'WASecretBundle': dados.data().WASecretBundle,
+                    'WAToken1': dados.data().WAToken1,
+                    'WAToken2': dados.data().WAToken2
+                }
+                resolve(data)
+            } catch (error) {
+                reject(error)
+            }
+        })
     }
 }
