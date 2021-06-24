@@ -6,34 +6,20 @@
  */
 const wppconnect = require('@wppconnect-team/wppconnect');
 const Sessions = require('../controllers/sessions');
-require('dotenv').config();
 const events = require('../controllers/events');
 const webhooks = require('../controllers/webhooks');
 const firebase = require('../firebase/db');
 const firestore = firebase.firestore();
-
-const myTokenStore = new wppconnect.tokenStore.FileTokenStore({
-    decodeFunction: JSON.parse,
-    encodeFunction: JSON.stringify,
-    encoding: 'utf8',
-    fileExtension: '.data.json',
-    path: './tokens',
-});
-
-// Defina caso use o Browserless abaixo
-const token_browser = process.env.TOKEN_BROWSERLESS
-
 module.exports = class Wppconnect {
 
     static async start(req, res, session) {
 
-        const data = Sessions.getSession(session)
         let token = await this.getToken(session);
 
         try {
             const client = await wppconnect.create({
                 session: session,
-                tokenStore: myTokenStore,
+                tokenStore: 'memory',
                 catchQR: (base64Qrimg, ascii) => {
                     webhooks.wh_qrcode(session, base64Qrimg)
                     console.log(ascii)
@@ -67,7 +53,7 @@ module.exports = class Wppconnect {
                 headless: true,
                 logQR: true,
                 browserWS: '', //browserless !=  '' ? browserless.replace('https://', 'wss://')+'?token='+token_browser : '',
-                useChrome: true,
+                useChrome: false,
                 updatesLog: false,
                 autoClose: 90000,
                 browserArgs: [
@@ -106,7 +92,7 @@ module.exports = class Wppconnect {
                     WABrowserId: token.WABrowserId,
                     WASecretBundle: token.WASecretBundle,
                     WAToken1: token.WAToken1,
-                    WAToken2: token.WAToken2,
+                    WAToken2: token.WAToken2
                 }
 
             })
@@ -155,13 +141,18 @@ module.exports = class Wppconnect {
             try {
                 const Session = await firestore.collection('Sessions').doc(session);
                 const dados = await Session.get();
-                let data = {
-                    'WABrowserId': dados.data().WABrowserId,
-                    'WASecretBundle': dados.data().WASecretBundle,
-                    'WAToken1': dados.data().WAToken1,
-                    'WAToken2': dados.data().WAToken2
+                if (!dados.exists) {
+                    resolve('no results found')
+                } else {
+                    let data = {
+                        'WABrowserId': dados.data().WABrowserId,
+                        'WASecretBundle': dados.data().WASecretBundle,
+                        'WAToken1': dados.data().WAToken1,
+                        'WAToken2': dados.data().WAToken2
+                    }
+                    resolve(data)
                 }
-                resolve(data)
+
             } catch (error) {
                 reject(error)
             }

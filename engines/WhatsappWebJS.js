@@ -10,136 +10,154 @@ const qrcodeBase64 = require('qrcode');
 const { Launcher } = require('chrome-launcher');
 let chromeLauncher = Launcher.getInstallations()[0];
 const Sessions = require('../controllers/sessions');
-const events = require('../controllers/events');
+const events = require('../controllers/events_wppjs');
 const webhooks = require('../controllers/webhooks');
 const fs = require('fs');
 const path = require('path');
+const firebase = require('../firebase/db');
+const { resolve } = require('path');
+const firestore = firebase.firestore();
 
 module.exports = class WhatsappWebJS {
     static async start(req, res, session) {
-        console.log(`****** STARTING SESSION ${session} ******`)
-        const SESSION_FILE_PATH = path.resolve(`./tokens/${session}.data.json`);
-        let client;
-        let dataSession;
+        return new Promise(async (resolve, reject) => {
+            try {
+                const Session = await firestore.collection('Sessions').doc(session);
+                const dados = await Session.get();
+                let client;
+                if (dados.exists) {
+                    console.log(`****** STARTING SESSION ${session} ******`)
+                    client = new Client({
+                        restartOnAuthFail: true,
+                        puppeteer: {
+                            headless: true,
+                            args: [
+                                '--no-sandbox',
+                                '--disable-setuid-sandbox',
+                                '--disable-dev-shm-usage',
+                                '--disable-accelerated-2d-canvas',
+                                '--no-first-run',
+                                '--no-zygote',
+                                '--single-process',
+                                '--disable-gpu'
+                            ],
+                        },
+                        session: {
+                            WABrowserId: dados.data().WABrowserId,
+                            WASecretBundle: dados.data().WASecretBundle,
+                            WAToken1: dados.data().WAToken1,
+                            WAToken2: dados.data().WAToken2
+                        }
+                    });
 
-        const withSession = () => {
-            dataSession = require(SESSION_FILE_PATH);
-            client = new Client({
-                restartOnAuthFail: true,
-                puppeteer: {
-                    headless: true,
-                    args: [
-                        '--no-sandbox',
-                        '--disable-setuid-sandbox',
-                        '--disable-dev-shm-usage',
-                        '--disable-accelerated-2d-canvas',
-                        '--no-first-run',
-                        '--no-zygote',
-                        '--single-process',
-                        '--disable-gpu'
-                    ],
-                },
-                session: dataSession
-            });
-
-            client.on('ready', () => {
-                Sessions.addInfoSession(session, {
-                    session: session,
-                    client: client
-                })
-                req.io.emit('whatsapp-status', true);
-                console.log('READY... WhatsApp is ready');
-            });
-            client.on('auth_failure', () => {
-                console.log('Auth failure, restarting...');
-                fs.unlinkSync(`./tokens/${session}.data.json`);
-            })
-            client.initialize();
-            Sessions.addInfoSession(session, {
-                session: session,
-                client: client
-            })
-        }
-
-        const withOutSession = () => {
-            client = new Client();
-            client.on('qr', (qr) => {
-                console.log('QR RECEIVED', qr);
-                qrcode.generate(qr, { small: true });
-                qrcodeBase64.toDataURL(qr, (err, url) => {
-                    webhooks.wh_qrcode(session, url)
-                    this.exportQR(req, res, url, session);
-                    Sessions.addInfoSession(session, {
-                        qrCode: url
+                    client.on('ready', () => {
+                        req.io.emit('whatsapp-status', true);
+                        console.log('READY... WhatsApp is ready');
+                    });
+                    client.on('auth_failure', () => {
+                        console.log('Auth failure, restarting...');
                     })
+                    client.initialize();
+                    Sessions.addInfoSession(session, {
+                        session: session,
+                        client: client
+                    })
+
+                } else {
+                    console.log(`****** STARTING SESSION ${session} ******`)
+                    client = new Client({
+                        restartOnAuthFail: true,
+                        puppeteer: {
+                            headless: true,
+                            args: [
+                                '--no-sandbox',
+                                '--disable-setuid-sandbox',
+                                '--disable-dev-shm-usage',
+                                '--disable-accelerated-2d-canvas',
+                                '--no-first-run',
+                                '--no-zygote',
+                                '--single-process',
+                                '--disable-gpu'
+                            ],
+                        }
+                    });
+                    client.on('qr', (qr) => {
+                        console.log('QR RECEIVED', qr);
+                        qrcode.generate(qr, { small: true });
+                        qrcodeBase64.toDataURL(qr, (err, url) => {
+                            webhooks.wh_qrcode(session, url)
+                            this.exportQR(req, res, url, session);
+                            Sessions.addInfoSession(session, {
+                                qrCode: url
+                            })
+                        });
+                    });
+                    client.on('ready', () => {
+                        console.log('READY... WhatsApp is ready');
+                    });
+                    client.on('auth_failure', () => {
+                        console.log('Auth failure, restarting...');
+                    })
+                    client.initialize();
+                    Sessions.addInfoSession(session, {
+                        session: session,
+                        client: client
+                    })
+                }
+                events.receiveMessage(session, client)
+                client.on('authenticated', (session) => {
+                    resolve(session)
                 });
-            });
-            client.on('ready', () => {
-                console.log('READY... WhatsApp is ready');
-            });
-            client.on('auth_failure', () => {
-                console.log('Auth failure, restarting...');
-                fs.unlinkSync(`./tokens/${session}.data.json`);
-            })
-            client.on('authenticated', (session) => {
-                dataSession = session;
-                fs.writeFile(SESSION_FILE_PATH, JSON.stringify(session), (err) => {
-                    if (err) console.log(err);
+                client.on('change_state', (reason) => {
+                    console.log('Client was change state', reason);
+                    webhooks.wh_connect(session, reason)
                 });
-            });
-            client.initialize();
-            Sessions.addInfoSession(session, {
-                session: session,
-                client: client
-            })
-        }
 
-        (fs.existsSync(SESSION_FILE_PATH)) ? withSession() : withOutSession();
+                client.on('disconnected', (reason) => {
+                    console.log('Whatsapp is disconnected!');
+                    client.destroy();
+                    client.initialize();
+                });
 
-        client.on('change_state', (reason) => {
-            console.log('Client was change state', reason);
-            webhooks.wh_connect(session, reason)
-        });
+                client.on('change_battery', (batteryInfo) => {
+                    const { battery, plugged } = batteryInfo;
+                    console.log(`Battery: ${battery}% - Charging? ${plugged}`);
+                });
 
-        client.on('disconnected', (reason) => {
-            console.log('Whatsapp is disconnected!');
-            fs.unlinkSync(SESSIONS_FILE, function (err) {
-                if (err) return console.log(err);
-                console.log('Session file deleted!');
-            });
-            client.destroy();
-            client.initialize();
-        });
+                client.on('message', async message => {
 
-        client.on('change_battery', (batteryInfo) => {
-            const { battery, plugged } = batteryInfo;
-            console.log(`Battery: ${battery}% - Charging? ${plugged}`);
-        });
+                })
 
-        client.on('message', async message => {
+                client.on('message_ack', (message, ack) => {
+                    //console.log(message)
 
+                });
+
+                client.on('message_create', (message) => {
+                    console.log(message)
+                    // Disparado em todas as criações de mensagem, incluindo a sua => AQUI IREI DESENVOLVER O DISPARO PARA O WEBHOOK
+                    if (message.fromMe) {
+                        // faça coisas aqui, pode ser disparado um webhook por exemplo
+                    }
+                });
+
+                client.on('message_revoke_everyone', async (after, before) => {
+                    // Disparado sempre que uma mensagem é excluída por alguém (incluindo você)
+                    //console.log(after); // mensagem depois de ser excluída.
+                    if (before) {
+                        //console.log(before); // mensagem antes de ser excluída.
+                    }
+                });
+
+                client.on('message_revoke_me', async (message) => {
+                    // Disparado sempre que uma mensagem é excluída apenas em sua própria visualização.
+                    console.log(message.body); // mensagem antes de ser excluída.
+                });
+            } catch (error) {
+                reject(error)
+                console.log(error)
+            }
         })
-
-        client.on('message_create', (message) => {
-            //console.log(message)
-            // Disparado em todas as criações de mensagem, incluindo a sua => AQUI IREI DESENVOLVER O DISPARO PARA O WEBHOOK
-            if (message.fromMe) {
-                // faça coisas aqui, pode ser disparado um webhook por exemplo
-            }
-        });
-
-        client.on('message_revoke_everyone', async (after, before) => {
-            // Disparado sempre que uma mensagem é excluída por alguém (incluindo você)
-            //console.log(after); // mensagem depois de ser excluída.
-            if (before) {
-                //console.log(before); // mensagem antes de ser excluída.
-            }
-        });
-
-        client.on('message_revoke_me', async (message) => {
-            // Disparado sempre que uma mensagem é excluída apenas em sua própria visualização.
-            console.log(message.body); // mensagem antes de ser excluída.
-        });
     }
     static async exportQR(req, res, qrCode, session) {
         qrCode = qrCode.replace('data:image/png;base64,', '');

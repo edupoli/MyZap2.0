@@ -18,7 +18,6 @@ const { checkParams } = require('../middlewares/validations');
 const { checkNumber } = require('../middlewares/checkNumber');
 const database = require('../firebase/functions');
 const firebase = require('../firebase/db');
-const SessionsDB = require('../firebase/model');
 const firestore = firebase.firestore();
 
 Router.post('/start', async (req, res) => {
@@ -98,16 +97,13 @@ Router.post('/start', async (req, res) => {
 
 })
 
-Router.post('/addSession', database.addSession);
-Router.post('/getAllSessions', database.getAllSessions);
-Router.post('/getSession', database.getSession);
-Router.post('/updateSession', database.updateSession);
 // Sessões 
-Router.post('/logout', checkParams, Auth.logoutSession); //ok
-Router.post('/close', checkParams, Auth.closeSession); //ok
-Router.post('/SessionState', checkParams, Auth.getSessionState); //ok
-Router.post('/SessionConnect', checkParams, Auth.checkConnectionSession); //ok
-Router.get('/getQrCode', checkParams, Auth.getQrCode); //ok
+Router.post('/logout', checkParams, Auth.logoutSession);
+Router.post('/close', checkParams, Auth.closeSession);
+Router.post('/SessionState', checkParams, Auth.getSessionState);
+Router.post('/SessionConnect', checkParams, Auth.checkConnectionSession);
+Router.post('/deleteSession', checkParams, database.deleteSession);
+Router.get('/getQrCode', checkParams, Auth.getQrCode);
 
 // Mensagens
 Router.post('/sendText', checkParams, checkNumber, Mensagens.sendText); //ok

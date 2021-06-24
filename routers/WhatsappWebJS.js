@@ -13,6 +13,8 @@ const Status = require('../functions/WhatsappWebJS/status');
 const config = require('../config');
 const { checkParams } = require('../middlewares/validations');
 const { checkNumber } = require('../middlewares/checkNumber');
+const firebase = require('../firebase/db');
+const firestore = firebase.firestore();
 
 Router.post('/start', async (req, res) => {
 
@@ -54,9 +56,24 @@ Router.post('/start', async (req, res) => {
 
             let response = await engine.start(req, res, session)
 
+            let data = {
+                'session': session,
+                'apitoken': req.headers['apitoken'],
+                'wh_status': req.body.wh_status,
+                'wh_message': req.body.wh_message,
+                'wh_qrcode': req.body.wh_qrcode,
+                'wh_connect': req.body.wh_connect,
+                'WABrowserId': response.WABrowserId,
+                'WASecretBundle': response.WASecretBundle,
+                'WAToken1': response.WAToken1,
+                'WAToken2': response.WAToken2
+            }
+            await firestore.collection('Sessions').doc(session).set(data);
+
             res.status(200).json({
                 "result": 200,
-                "status": "CONNECTED"
+                "status": "CONNECTED",
+                "response": 'Sessão gravada com sucesso no Firebase'
             })
         }
     }
