@@ -15,7 +15,8 @@ const motor = require('./engines');
 const config = require('./config');
 const { yo } = require('yoo-hoo');
 const router = motor.engines[process.env.ENGINE].router
-require('events').EventEmitter.prototype._maxListeners = 0;
+require('events').EventEmitter.prototype._maxListeners = 999;
+const { startAllSessions } = require('./startup');
 
 const io = require('socket.io')(server, {
     cors: {
@@ -65,22 +66,40 @@ if (config.https == 1) {
             key: fs.readFileSync(config.ssl_key_path),
             cert: fs.readFileSync(config.ssl_cert_path)
         },
-        server).listen(config.port, () => {
+        server).listen(config.port, async (error) => {
+            if (error) {
+                console.log(error)
+            }
+            else {
+                console.log('\n\nWelcome to')
+                yo('MyZAP', {
+                    color: 'rainbow',
+                    spacing: 1,
+                });
+                console.log(`Http server running on ${config.host}:${config.port}`);
+                if (config.start_all_sessions === 'true') {
+                    let result = await startAllSessions()
+                    console.log(result)
+                }
+            }
+        });
+} else {
+    server.listen(config.port, async (error) => {
+        if (error) {
+            console.log(error)
+        }
+        else {
             console.log('\n\nWelcome to')
             yo('MyZAP', {
                 color: 'rainbow',
                 spacing: 1,
             });
             console.log(`Http server running on ${config.host}:${config.port}`);
-        });
-} else {
-    server.listen(config.port, () => {
-        console.log('\n\nWelcome to')
-        yo('MyZAP', {
-            color: 'rainbow',
-            spacing: 1,
-        });
-        console.log(`Http server running on ${config.host}:${config.port}`);
+            if (config.start_all_sessions === 'true') {
+                let result = await startAllSessions()
+                console.log(result)
+            }
+        }
     });
 }
 

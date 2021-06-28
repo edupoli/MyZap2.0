@@ -3,7 +3,7 @@
 # Project: myzap2.0                                                            #
 # Created Date: 2021-06-27 02:34:00                                            #
 # Author: Eduardo Policarpo                                                    #
-# Last Modified: 2021-06-28 01:51:50                                           #
+# Last Modified: 2021-06-28 03:28:46                                           #
 # Modified By: Eduardo Policarpo                                               #
 ##############################################################################*/
 
@@ -48,7 +48,7 @@ async function getAllSessions() {
     }
 }
 
-(async () => {
+async function startAllSessions() {
     let dados = await getAllSessions()
     dados.map((item) => {
         var options = {
@@ -74,5 +74,5 @@ async function getAllSessions() {
             console.log(error)
         })
     });
-
-})();
+}
+module.exports.startAllSessions = startAllSessions;

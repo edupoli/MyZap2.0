@@ -3,7 +3,7 @@
 # Project: myzap2.0                                                            #
 # Created Date: 2021-06-21 12:52:13                                            #
 # Author: Eduardo Policarpo                                                    #
-# Last Modified: 2021-06-27 02:26:57                                           #
+# Last Modified: 2021-06-28 04:10:43                                           #
 # Modified By: Eduardo Policarpo                                               #
 ##############################################################################*/
 
@@ -26,7 +26,8 @@ const {
     PROJECT_ID,
     STORAGE_BUCKET,
     MESSAGING_SENDER_ID,
-    APP_ID
+    APP_ID,
+    START_ALL_SESSIONS
 } = process.env;
 
 assert(PORT, 'PORT is required, please set the PORT variable value in the .env file');
@@ -50,5 +51,6 @@ module.exports = {
         storageBucket: STORAGE_BUCKET,
         messagingSenderId: MESSAGING_SENDER_ID,
         appId: APP_ID
-    }
+    },
+    start_all_sessions: START_ALL_SESSIONS
 }
