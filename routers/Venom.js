@@ -16,6 +16,9 @@ const Auth = require('../functions/WPPConnect/auth');
 const config = require('../config');
 const { checkParams } = require('../middlewares/validations');
 const { checkNumber } = require('../middlewares/checkNumber');
+const database = require('../firebase/functions');
+const firebase = require('../firebase/db');
+const firestore = firebase.firestore();
 
 
 Router.post('/start', async (req, res) => {
@@ -58,14 +61,27 @@ Router.post('/start', async (req, res) => {
 
             let response = await engine.start(req, res, session)
 
-            if (response !== null) {
-                req.io.emit('whatsapp-status', true)
+            let data = {
+                'session': session,
+                'apitoken': req.headers['apitoken'],
+                'sessionkey': req.headers['sessionkey'],
+                'wh_status': req.body.wh_status,
+                'wh_message': req.body.wh_message,
+                'wh_qrcode': req.body.wh_qrcode,
+                'wh_connect': req.body.wh_connect,
+                'WABrowserId': response.WABrowserId,
+                'WASecretBundle': response.WASecretBundle,
+                'WAToken1': response.WAToken1,
+                'WAToken2': response.WAToken2
             }
+            await firestore.collection('Sessions').doc(session).set(data);
 
             res.status(200).json({
                 "result": 200,
-                "status": "CONNECTED"
+                "status": "CONNECTED",
+                "response": 'Sessão gravada com sucesso no Firebase'
             })
+
         }
     }
     else {
@@ -84,27 +100,32 @@ Router.post('/start', async (req, res) => {
 })
 
 // Sessões 
-Router.post('/logout', checkParams, Auth.logoutSession); //ok
-Router.post('/close', checkParams, Auth.closeSession); //ok
-Router.post('/SessionState', checkParams, Auth.getSessionState); //ok
-Router.post('/SessionConnect', checkParams, Auth.checkConnectionSession); //ok
-Router.get('/getQrCode', checkParams, Auth.getQrCode); //ok
+Router.post('/logout', checkParams, Auth.logoutSession);
+Router.post('/close', checkParams, Auth.closeSession);
+Router.post('/SessionState', checkParams, Auth.getSessionState);
+Router.post('/deleteSession', database.deleteSession);
+Router.post('/SessionConnect', checkParams, Auth.checkConnectionSession);
+Router.get('/getQrCode', checkParams, Auth.getQrCode);
 
 // Mensagens
-Router.post('/sendText', checkParams, checkNumber, Mensagens.sendText); //ok
-Router.post('/sendImage', checkParams, checkNumber, Mensagens.sendImage); //ok
-Router.post('/sendVideo', checkParams, checkNumber, Mensagens.sendVideo); //ok
-Router.post('/sendSticker', checkParams, checkNumber, Mensagens.sendSticker); //ok
-Router.post('/sendFile', checkParams, checkNumber, Mensagens.sendFile); //ok
+Router.post('/sendText', checkParams, checkNumber, Mensagens.sendText);
+Router.post('/sendImage', checkParams, checkNumber, Mensagens.sendImage);
+Router.post('/sendVideo', checkParams, checkNumber, Mensagens.sendVideo);
+Router.post('/sendSticker', checkParams, checkNumber, Mensagens.sendSticker);
+Router.post('/sendFile', checkParams, checkNumber, Mensagens.sendFile);
 Router.post('/sendFile64', checkParams, checkNumber, Mensagens.sendFile64);
-Router.post('/sendAudio', checkParams, checkNumber, Mensagens.sendAudio); //ok
+Router.post('/sendAudio', checkParams, checkNumber, Mensagens.sendAudio);
 Router.post('/sendAudio64', checkParams, checkNumber, Mensagens.sendVoiceBase64);
-Router.post('/sendLink', checkParams, checkNumber, Mensagens.sendLink); //ok
+Router.post('/sendLink', checkParams, checkNumber, Mensagens.sendLink);
 Router.post('/sendContact', checkParams, checkNumber, Mensagens.sendContact);
 Router.post('/sendLocation', checkParams, checkNumber, Mensagens.sendLocation);
 Router.post('/reply', checkParams, Mensagens.reply);
 Router.post('/forwardMessages', checkParams, Mensagens.forwardMessages);
 Router.post('/getMessagesChat', checkParams, checkNumber, Commands.getMessagesChat);
+Router.post('/getAllChats', checkParams, Commands.getAllChats);
+Router.post('/getAllChatsWithMessages', checkParams, Commands.getAllChatsWithMessages);
+Router.post('/getAllNewMessages', checkParams, Commands.getAllNewMessages);
+Router.post('/getAllUnreadMessages', checkParams, Commands.getAllUnreadMessages);
 
 // // Grupos
 Router.post('/getAllGroups', checkParams, Groups.getAllGroups);

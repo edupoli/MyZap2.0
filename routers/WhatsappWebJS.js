@@ -15,6 +15,7 @@ const { checkParams } = require('../middlewares/validations');
 const { checkNumber } = require('../middlewares/checkNumber');
 const firebase = require('../firebase/db');
 const firestore = firebase.firestore();
+const database = require('../firebase/functions');
 
 Router.post('/start', async (req, res) => {
 
@@ -59,6 +60,7 @@ Router.post('/start', async (req, res) => {
             let data = {
                 'session': session,
                 'apitoken': req.headers['apitoken'],
+                'sessionkey': req.headers['sessionkey'],
                 'wh_status': req.body.wh_status,
                 'wh_message': req.body.wh_message,
                 'wh_qrcode': req.body.wh_qrcode,
@@ -93,6 +95,7 @@ Router.post('/start', async (req, res) => {
 })
 
 // Mensagens
+Router.post('/deleteSession', database.deleteSession);
 Router.post('/sendText', checkParams, checkNumber, Mensagens.sendText);
 Router.post('/sendImage', checkNumber, Mensagens.sendImage);
 Router.post('/sendVideo', checkNumber, Mensagens.sendVideo);

@@ -63,6 +63,7 @@ Router.post('/start', async (req, res) => {
             let data = {
                 'session': session,
                 'apitoken': req.headers['apitoken'],
+                'sessionkey': req.headers['sessionkey'],
                 'wh_status': req.body.wh_status,
                 'wh_message': req.body.wh_message,
                 'wh_qrcode': req.body.wh_qrcode,
@@ -102,24 +103,28 @@ Router.post('/logout', checkParams, Auth.logoutSession);
 Router.post('/close', checkParams, Auth.closeSession);
 Router.post('/SessionState', checkParams, Auth.getSessionState);
 Router.post('/SessionConnect', checkParams, Auth.checkConnectionSession);
-Router.post('/deleteSession', checkParams, database.deleteSession);
-Router.get('/getQrCode', checkParams, Auth.getQrCode);
+Router.post('/deleteSession', database.deleteSession);
+Router.get('/getQrCode', Auth.getQrCode);
 
 // Mensagens
-Router.post('/sendText', checkParams, checkNumber, Mensagens.sendText); //ok
-Router.post('/sendImage', checkParams, checkNumber, Mensagens.sendImage); //ok
-Router.post('/sendVideo', checkParams, checkNumber, Mensagens.sendVideo); //ok
-Router.post('/sendSticker', checkParams, checkNumber, Mensagens.sendSticker); //ok
-Router.post('/sendFile', checkParams, checkNumber, Mensagens.sendFile); //ok
+Router.post('/sendText', checkParams, checkNumber, Mensagens.sendText);
+Router.post('/sendImage', checkParams, checkNumber, Mensagens.sendImage);
+Router.post('/sendVideo', checkParams, checkNumber, Mensagens.sendVideo);
+Router.post('/sendSticker', checkParams, checkNumber, Mensagens.sendSticker);
+Router.post('/sendFile', checkParams, checkNumber, Mensagens.sendFile);
 Router.post('/sendFile64', checkParams, checkNumber, Mensagens.sendFile64);
-Router.post('/sendAudio', checkParams, checkNumber, Mensagens.sendAudio); //ok
+Router.post('/sendAudio', checkParams, checkNumber, Mensagens.sendAudio);
 Router.post('/sendAudio64', checkParams, checkNumber, Mensagens.sendVoiceBase64);
-Router.post('/sendLink', checkParams, checkNumber, Mensagens.sendLink); //ok
+Router.post('/sendLink', checkParams, checkNumber, Mensagens.sendLink);
 Router.post('/sendContact', checkParams, checkNumber, Mensagens.sendContact);
 Router.post('/sendLocation', checkParams, checkNumber, Mensagens.sendLocation);
 Router.post('/reply', checkParams, Mensagens.reply);
 Router.post('/forwardMessages', checkParams, Mensagens.forwardMessages);
 Router.post('/getMessagesChat', checkParams, checkNumber, Commands.getMessagesChat);
+Router.post('/getAllChats', checkParams, Commands.getAllChats);
+Router.post('/getAllChatsWithMessages', checkParams, Commands.getAllChatsWithMessages);
+Router.post('/getAllNewMessages', checkParams, Commands.getAllNewMessages);
+Router.post('/getAllUnreadMessages', checkParams, Commands.getAllUnreadMessages);
 Router.post('/getOrderbyMsg', checkParams, Mensagens.getOrderbyMsg);
 
 // // Grupos
@@ -133,8 +138,9 @@ Router.post('/removeParticipant', checkParams, checkNumber, Groups.removePartici
 Router.post('/promoteParticipant', checkParams, checkNumber, Groups.promoteParticipant);
 Router.post('/demoteParticipant', checkParams, checkNumber, Groups.demoteParticipant);
 Router.post('/getGroupAdmins', checkParams, Groups.getGroupAdmins);
+Router.post('/changePrivacyGroup', checkParams, Groups.changePrivacyGroup); //nova
 Router.post('/getGroupInviteLink', checkParams, Groups.getGroupInviteLink);
-Router.post('/setGroupPic', checkParams, checkNumber, Groups.setGroupPic); // ver funcao nao exite
+Router.post('/setGroupPic', checkParams, Groups.setGroupPic); // ver funcao nao exite
 
 // // Status
 Router.post('/sendTextToStorie', checkParams, Status.sendTextToStorie);

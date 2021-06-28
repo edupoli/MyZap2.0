@@ -15,6 +15,7 @@ const motor = require('./engines');
 const config = require('./config');
 const { yo } = require('yoo-hoo');
 const router = motor.engines[process.env.ENGINE].router
+require('events').EventEmitter.prototype._maxListeners = 0;
 
 const io = require('socket.io')(server, {
     cors: {

@@ -1,9 +1,9 @@
 /*##############################################################################
 # File: config.js                                                              #
-# Project: MyZap2.0                                                            #
+# Project: myzap2.0                                                            #
 # Created Date: 2021-06-21 12:52:13                                            #
 # Author: Eduardo Policarpo                                                    #
-# Last Modified: 2021-06-21 14:09:55                                           #
+# Last Modified: 2021-06-27 02:26:57                                           #
 # Modified By: Eduardo Policarpo                                               #
 ##############################################################################*/
 
@@ -18,11 +18,11 @@ const {
     HOST,
     TOKEN,
     HTTPS,
+    ENGINE,
     SSL_KEY_PATH,
     SSL_CERT_PATH,
     API_KEY,
     AUTH_DOMAIN,
-    DATABASE_URL,
     PROJECT_ID,
     STORAGE_BUCKET,
     MESSAGING_SENDER_ID,
@@ -31,8 +31,8 @@ const {
 
 assert(PORT, 'PORT is required, please set the PORT variable value in the .env file');
 assert(HOST, 'HOST is required, please set the HOST variable value in the .env file');
-assert(TOKEN, 'TOKEN is required, please set the token variable value in the .env file');
-
+assert(TOKEN, 'TOKEN is required, please set the ENGINE variable value in the .env file');
+assert(TOKEN, 'ENGINE is required, please set the ENGINE variable value in the .env file');
 
 
 module.exports = {
@@ -40,12 +40,12 @@ module.exports = {
     host: HOST,
     token: TOKEN,
     https: HTTPS,
+    engine: ENGINE,
     ssl_key_path: SSL_KEY_PATH,
     ssl_cert_path: SSL_CERT_PATH,
     firebaseConfig: {
         apiKey: API_KEY,
         authDomain: AUTH_DOMAIN,
-        databaseURL: DATABASE_URL,
         projectId: PROJECT_ID,
         storageBucket: STORAGE_BUCKET,
         messagingSenderId: MESSAGING_SENDER_ID,

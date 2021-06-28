@@ -99,6 +99,82 @@ module.exports = class Commands {
     }
   }
 
+  static async getAllChats(req, res) {
+    try {
+      let data = Sessions.getSession(req.body.session)
+      let response = await data.client.getAllChats()
+
+      return res.status(200).json({
+        "result": 200,
+        "messages": "SUCCESS",
+        "contacts": response
+      })
+    } catch (error) {
+      return res.status(400).json({
+        "result": 400,
+        "status": "FAIL",
+        "error": error
+      })
+    }
+  }
+
+  static async getAllChatsWithMessages(req, res) {
+    try {
+      let data = Sessions.getSession(req.body.session)
+      let response = await data.client.getAllChatsWithMessages()
+
+      return res.status(200).json({
+        "result": 200,
+        "messages": "SUCCESS",
+        "contacts": response
+      })
+    } catch (error) {
+      return res.status(400).json({
+        "result": 400,
+        "status": "FAIL",
+        "error": error
+      })
+    }
+  }
+
+  static async getAllNewMessages(req, res) {
+    try {
+      let data = Sessions.getSession(req.body.session)
+      let response = await data.client.getAllNewMessages()
+
+      return res.status(200).json({
+        "result": 200,
+        "messages": "SUCCESS",
+        "contacts": response
+      })
+    } catch (error) {
+      return res.status(400).json({
+        "result": 400,
+        "status": "FAIL",
+        "error": error
+      })
+    }
+  }
+
+  static async getAllUnreadMessages(req, res) {
+    try {
+      let data = Sessions.getSession(req.body.session)
+      let response = await data.client.getAllUnreadMessages()
+
+      return res.status(200).json({
+        "result": 200,
+        "messages": "SUCCESS",
+        "contacts": response
+      })
+    } catch (error) {
+      return res.status(400).json({
+        "result": 400,
+        "status": "FAIL",
+        "error": error
+      })
+    }
+  }
+
   static async getBlockList(req, res) {
     try {
       let data = Sessions.getSession(req.body.session)
@@ -135,7 +211,7 @@ module.exports = class Commands {
           "from": data.from,
           "to": data.to,
           "mensagem": data.body,
-          "enviada em": moment(data.t).format('DD-MM-YYYY hh:mm:ss')
+          "enviada em": moment.unix(data.t).format('DD-MM-YYYY hh:mm:ss')
         }
       })
       return res.status(200).json({

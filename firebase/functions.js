@@ -3,7 +3,7 @@
 # Project: myzap2.0                                                            #
 # Created Date: 2021-06-21 18:41:44                                            #
 # Author: Eduardo Policarpo                                                    #
-# Last Modified: 2021-06-23 10:15:16                                           #
+# Last Modified: 2021-06-28 00:20:49                                           #
 # Modified By: Eduardo Policarpo                                               #
 ##############################################################################*/
 
@@ -36,17 +36,17 @@ module.exports = class Firebase {
                 data.forEach(doc => {
                     const Session = new SessionsDB(
                         doc.id,
-                        doc.data().name,
+                        doc.data().session,
                         doc.data().apitoken,
                         doc.data().sessionkey,
                         doc.data().wh_status,
                         doc.data().wh_message,
                         doc.data().wh_qrcode,
                         doc.data().wh_connect,
-                        doc.data().wa_browser_id,
-                        doc.data().wa_secret_bundle,
-                        doc.data().wa_token_1,
-                        doc.data().wa_token_2
+                        doc.data().WABrowserId,
+                        doc.data().WASecretBundle,
+                        doc.data().WAToken1,
+                        doc.data().WAToken2
                     );
                     SessionsArray.push(Session);
                 });
@@ -74,7 +74,7 @@ module.exports = class Firebase {
 
     static async updateSession(req, res, next) {
         try {
-            const id = req.params.id;
+            const id = req.body.id;
             const data = req.body;
             const Session = await firestore.collection('Sessions').doc(id);
             await Session.update(data);
@@ -86,9 +86,14 @@ module.exports = class Firebase {
 
     static async deleteSession(req, res, next) {
         try {
-            const id = req.params.id;
-            await firestore.collection('Sessions').doc(id).delete();
-            res.send('Record deleted successfuly');
+            const id = req.body.id;
+            if (!id) {
+                res.status(400).send('Session não informada');
+            }
+            else {
+                await firestore.collection('Sessions').doc(id).delete();
+                res.send('Record deleted successfuly');
+            }
         } catch (error) {
             res.status(400).send(error.message);
         }

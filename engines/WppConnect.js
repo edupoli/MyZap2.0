@@ -22,7 +22,6 @@ module.exports = class Wppconnect {
                 tokenStore: 'memory',
                 catchQR: (base64Qrimg, ascii) => {
                     webhooks.wh_qrcode(session, base64Qrimg)
-                    console.log(ascii)
                     this.exportQR(req, res, base64Qrimg, session);
                     Sessions.addInfoSession(session, {
                         qrCode: base64Qrimg
@@ -53,7 +52,7 @@ module.exports = class Wppconnect {
                 headless: true,
                 logQR: true,
                 browserWS: '', //browserless !=  '' ? browserless.replace('https://', 'wss://')+'?token='+token_browser : '',
-                useChrome: false,
+                useChrome: true,
                 updatesLog: false,
                 autoClose: 90000,
                 browserArgs: [

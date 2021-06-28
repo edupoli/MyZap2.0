@@ -10,12 +10,9 @@ const qrcodeBase64 = require('qrcode');
 const { Launcher } = require('chrome-launcher');
 let chromeLauncher = Launcher.getInstallations()[0];
 const Sessions = require('../controllers/sessions');
-const events = require('../controllers/events_wppjs');
+const events = require('../controllers/events');
 const webhooks = require('../controllers/webhooks');
-const fs = require('fs');
-const path = require('path');
 const firebase = require('../firebase/db');
-const { resolve } = require('path');
 const firestore = firebase.firestore();
 
 module.exports = class WhatsappWebJS {
@@ -29,6 +26,7 @@ module.exports = class WhatsappWebJS {
                     console.log(`****** STARTING SESSION ${session} ******`)
                     client = new Client({
                         restartOnAuthFail: true,
+                        takeoverOnConflict: false,
                         puppeteer: {
                             headless: true,
                             args: [
@@ -67,6 +65,7 @@ module.exports = class WhatsappWebJS {
                     console.log(`****** STARTING SESSION ${session} ******`)
                     client = new Client({
                         restartOnAuthFail: true,
+                        takeoverOnConflict: false,
                         puppeteer: {
                             headless: true,
                             args: [
@@ -105,6 +104,8 @@ module.exports = class WhatsappWebJS {
                     })
                 }
                 events.receiveMessage(session, client)
+                events.statusMessage(session, client)
+
                 client.on('authenticated', (session) => {
                     resolve(session)
                 });
@@ -128,15 +129,17 @@ module.exports = class WhatsappWebJS {
 
                 })
 
+                client.on('message_received', async message => {
+
+                })
+
                 client.on('message_ack', (message, ack) => {
-                    //console.log(message)
 
                 });
 
-                client.on('message_create', (message) => {
-                    console.log(message)
-                    // Disparado em todas as criações de mensagem, incluindo a sua => AQUI IREI DESENVOLVER O DISPARO PARA O WEBHOOK
-                    if (message.fromMe) {
+                client.on('message_create', async (message) => {
+                    // Disparado em todas as criações de mensagem, incluindo a sua 
+                    if (!message.fromMe) {
                         // faça coisas aqui, pode ser disparado um webhook por exemplo
                     }
                 });
@@ -151,8 +154,18 @@ module.exports = class WhatsappWebJS {
 
                 client.on('message_revoke_me', async (message) => {
                     // Disparado sempre que uma mensagem é excluída apenas em sua própria visualização.
-                    console.log(message.body); // mensagem antes de ser excluída.
+                    //console.log(message.body); // mensagem antes de ser excluída.
                 });
+
+                client.on('media_uploaded', async (message) => {
+                    //Disparado sempre quando a mídia foi carregada para uma mensagem enviada pelo cliente.
+                });
+
+                client.on('group_update', async (message) => {
+                    //Disparado sempre quando as configurações do grupo são atualizadas, como assunto, descrição ou imagem.
+                    //console.log(message)
+                });
+
             } catch (error) {
                 reject(error)
                 console.log(error)

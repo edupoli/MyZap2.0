@@ -5,16 +5,15 @@
  * @LastEditTime: 2021-06-07 03:18:01
  */
 const Sessions = require('../controllers/sessions')
-require('dotenv').config();
+const config = require('../config');
 
 const checkNumber = async (req, res, next) => {
     const c = '@c.us'
     let number = req.body.number
     let session = req.body.session
     let data = Sessions.getSession(session)
-    let engine = process.env.ENGINE;
 
-    if (engine === '1') {
+    if (config.engine === '1') {
         let profile = await data.client.isRegisteredUser(req.body.number + c)
 
         if (!number) {

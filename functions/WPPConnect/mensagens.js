@@ -57,15 +57,16 @@ module.exports = class Mensagens {
             }
 
             let response = await data.client.sendImage(number, path, 'imagem', caption)
+            console.log(response)
             return res.status(200).json({
                 result: 200,
                 type: 'image',
-                messageId: response.id,
+                messageId: response._serialized,
                 session: req.body.session,
-                from: response.from.split('@')[0],
-                to: response.to.user,
+                from: response.me.wid._serialized.split('@')[0],
+                to: response.to.remote.user,
                 file: req.body.url,
-                mimetype: response.mimeType,
+                mimetype: response.mimeType,//ok
 
             })
         } catch (error) {
@@ -100,12 +101,8 @@ module.exports = class Mensagens {
                     result: 200,
                     type: 'video',
                     session: req.body.session,
-                    messageId: response.id,
-                    from: response.from.split('@')[0],
-                    to: response.to.user,
                     file: name,
-                    content: response.content,
-                    mimetype: response.mimeType
+                    data: response
                 })
             }
             if (!isURL) {
@@ -116,12 +113,8 @@ module.exports = class Mensagens {
                     result: 200,
                     type: 'video',
                     session: req.body.session,
-                    messageId: response.id,
-                    from: response.from.split('@')[0],
-                    to: response.to.user,
                     file: name,
-                    content: response.content,
-                    mimetype: response.mimeType
+                    data: response
                 })
             }
 
@@ -157,11 +150,8 @@ module.exports = class Mensagens {
                     type: 'sticker',
                     messageId: response.id,
                     session: req.body.session,
-                    from: response.from.split('@')[0],
-                    to: response.to.user,
                     file: name,
-                    content: response.content,
-                    mimetype: response.mimeType
+                    data: response
                 })
             }
             if (!isURL) {
@@ -171,11 +161,8 @@ module.exports = class Mensagens {
                     type: 'sticker',
                     messageId: response.id,
                     session: req.body.session,
-                    from: response.from.split('@')[0],
-                    to: response.to.user,
                     file: name,
-                    content: response.content,
-                    mimetype: response.mimeType
+                    data: response
                 })
             }
         } catch (error) {
@@ -211,13 +198,9 @@ module.exports = class Mensagens {
                 return res.status(200).json({
                     result: 200,
                     type: 'file',
-                    messageId: response.id,
                     session: req.body.session,
-                    from: response.from.split('@')[0],
-                    to: response.to.user,
                     file: name,
-                    content: response.content,
-                    mimetype: response.mimeType
+                    data: response
                 })
             }
             if (!isURL) {
@@ -225,13 +208,9 @@ module.exports = class Mensagens {
                 return res.status(200).json({
                     result: 200,
                     type: 'file',
-                    messageId: response.id,
                     session: req.body.session,
-                    from: response.from.split('@')[0],
-                    to: response.to.user,
                     file: name,
-                    content: response.content,
-                    mimetype: response.mimeType
+                    data: response
                 })
             }
         } catch (error) {
@@ -258,13 +237,9 @@ module.exports = class Mensagens {
             return res.status(200).json({
                 result: 200,
                 type: 'file',
-                messageId: response.id,
                 session: req.body.session,
-                from: response.from.split('@')[0],
-                to: response.chatId.user,
                 file: name,
-                content: response.content,
-                mimetype: response.mimeType
+                data: response
             })
 
         } catch (error) {
@@ -305,13 +280,9 @@ module.exports = class Mensagens {
                     return res.status(200).json({
                         result: 200,
                         type: 'ptt',
-                        messageId: response.id,
                         session: req.body.session,
-                        from: response.from.split('@')[0],
-                        to: response.to.user,
-                        file: file,
-                        content: response.content,
-                        mimetype: response.mimeType
+                        file: name,
+                        data: response
                     })
 
                 } catch (e) {
@@ -340,13 +311,9 @@ module.exports = class Mensagens {
                     return res.status(200).json({
                         result: 200,
                         type: 'ptt',
-                        messageId: response.id,
                         session: req.body.session,
-                        from: response.from.split('@')[0],
-                        to: response.to.user,
-                        file: file,
-                        content: response.content,
-                        mimetype: response.mimeType
+                        file: name,
+                        data: response
                     })
 
                 } catch (e) {
@@ -391,11 +358,7 @@ module.exports = class Mensagens {
                     type: 'audio',
                     messageId: response.id,
                     session: req.body.session,
-                    from: response.from.split('@')[0],
-                    to: response.chatId.user,
-                    file: 'audio',
-                    content: response.content,
-                    mimetype: response.mimeType
+                    data: response
                 })
 
             } catch (error) {
@@ -410,6 +373,7 @@ module.exports = class Mensagens {
 
     static async sendLink(req, res) {
         let data = Sessions.getSession(req.body.session)
+        let isURL = await urlExists(req.body.url);
         let number = req.body.number + '@c.us';
         if (!req.body.url) {
             return res.status(400).json({
@@ -417,27 +381,32 @@ module.exports = class Mensagens {
                 error: "URL não foi informada, é obrigatorio"
             })
         }
-        else {
-            try {
-                let response = await data.client.sendLinkPreview(number, req.body.url, req.body.text)
-
-                return res.status(200).json({
-                    result: 200,
-                    type: 'link',
-                    messageId: response.id,
-                    session: req.body.session,
-                    from: response.from.split('@')[0],
-                    to: response.to.user,
-                    content: response.content
-                })
-            } catch (error) {
+        else
+            if (!isURL) {
                 return res.status(400).json({
-                    result: 400,
-                    "status": "FAIL",
-                    "log": error
+                    status: 400,
+                    error: "Link informado é invalido"
                 })
             }
-        }
+            else {
+                try {
+                    let response = await data.client.sendLinkPreview(number, req.body.url, req.body.text)
+
+                    return res.status(200).json({
+                        result: 200,
+                        type: 'link',
+                        messageId: response.id,
+                        session: req.body.session,
+                        data: response
+                    })
+                } catch (error) {
+                    return res.status(400).json({
+                        result: 400,
+                        "status": "FAIL",
+                        "log": error
+                    })
+                }
+            }
     }
 
     static async sendContact(req, res) {
@@ -463,9 +432,7 @@ module.exports = class Mensagens {
                     type: 'contact',
                     messageId: response.id,
                     session: req.body.session,
-                    from: response.from.split('@')[0],
-                    to: response.to.user,
-                    content: response.content
+                    data: response
                 })
             } catch (error) {
                 return res.status(400).json({
@@ -512,9 +479,7 @@ module.exports = class Mensagens {
                     type: 'locate',
                     messageId: response.id,
                     session: req.body.session,
-                    from: response.from.split('@')[0],
-                    to: response.to.user,
-                    content: response.content
+                    data: response
                 })
             } catch (error) {
                 return res.status(400).json({
@@ -549,9 +514,7 @@ module.exports = class Mensagens {
                     type: 'text',
                     session: req.body.session,
                     messageId: response.id,
-                    from: response.from.split('@')[0],
-                    to: response.chat.id.user,
-                    content: response.content
+                    data: response
                 })
             } catch (error) {
                 return res.status(400).json({
@@ -586,8 +549,7 @@ module.exports = class Mensagens {
                     type: 'forward',
                     messageId: response.id,
                     session: req.body.session,
-                    from: response.from.split('@')[0],
-                    to: response.to.user,
+                    data: response
                 })
 
             } catch (error) {

@@ -6,16 +6,17 @@
  */
 const venom = require('venom-bot');
 const Sessions = require('../controllers/sessions');
-require('dotenv').config();
 const events = require('../controllers/events');
 const webhooks = require('../controllers/webhooks');
-// Defina caso use o Browserless abaixo
-const token_browser = process.env.TOKEN_BROWSERLESS
+const firebase = require('../firebase/db');
+const firestore = firebase.firestore();
 
 module.exports = class Venom {
 
     static async start(req, res, session) {
-        const data = Sessions.getSession(session)
+
+        let token = await this.getToken(session);
+        console.log(token)
         try {
             const client = await venom.create(
                 session,
@@ -55,7 +56,7 @@ module.exports = class Venom {
                     useChrome: true,
                     updatesLog: true,
                     autoClose: 90000,
-                    disableSpins: true,
+                    disableSpins: false,
                     browserArgs: [
                         '--log-level=3',
                         '--no-default-browser-check',
@@ -86,13 +87,13 @@ module.exports = class Venom {
                         '--disable-app-list-dismiss-on-blur',
                         '--disable-accelerated-video-decode',
                     ],
-                    createPathFileToken: true,
+                    createPathFileToken: false,
                 },
                 {
-                    WABrowserId: data.wa_browser_id,
-                    WASecretBundle: data.wa_secret_bundle,
-                    WAToken1: data.wa_token_1,
-                    WAToken2: data.wa_token_2,
+                    WABrowserId: token.WABrowserId,
+                    WASecretBundle: token.WASecretBundle,
+                    WAToken1: token.WAToken1,
+                    WAToken2: token.WAToken2
                 }
             )
 
@@ -108,7 +109,7 @@ module.exports = class Venom {
                 client: client,
                 tokens: tokens
             })
-            return client;
+            return client, tokens;
         } catch (error) {
             console.log(error)
         }
@@ -133,5 +134,28 @@ module.exports = class Venom {
                 session: session
             }
         );
+    }
+
+    static async getToken(session) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const Session = await firestore.collection('Sessions').doc(session);
+                const dados = await Session.get();
+                if (!dados.exists) {
+                    resolve('no results found')
+                } else {
+                    let data = {
+                        'WABrowserId': dados.data().WABrowserId,
+                        'WASecretBundle': dados.data().WASecretBundle,
+                        'WAToken1': dados.data().WAToken1,
+                        'WAToken2': dados.data().WAToken2
+                    }
+                    resolve(data)
+                }
+
+            } catch (error) {
+                reject(error)
+            }
+        })
     }
 }

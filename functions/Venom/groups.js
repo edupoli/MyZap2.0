@@ -5,7 +5,9 @@
  * @LastEditTime: 2021-06-07 03:18:01
  */
 const Sessions = require('../../controllers/sessions');
-const get = require("async-get-file")
+const get = require("async-get-file");
+const util = require('util');
+const urlExists = util.promisify(require('url-exists'));
 
 module.exports = class Group {
 
@@ -330,42 +332,52 @@ module.exports = class Group {
   }
 
   static async setGroupPic(req, res) {
+
+    if (!req.body.path) {
+      return res.status(400).send({
+        status: 400,
+        error: "Path não informado",
+        message: "Informe o path. Exemplo: C:\\folder\\video.mp4 para arquivo local ou URL caso o arquivo a ser enviado esteja na internet"
+      });
+    }
+    let data = Sessions.getSession(req.body.session)
+    let number = req.body.number;
+    let isURL = await urlExists(req.body.path);
+    let name = req.body.path.split(/[\/\\]/).pop();
     try {
-      if (!req.body.path) {
-        return res.status(400).send({
-          status: 400,
-          error: "Path não informado",
-          message: "Informe o path. Exemplo: C:\\folder\\imagem.jpg para arquivo local ou URL caso o arquivo a ser enviado esteja na internet"
-        });
-      }
-      let data = Sessions.getSession(req.body.session)
-      let number = req.body.number + '@c.us';
-      let isURL = await urlExists(req.body.path);
-      let name = req.body.path.split(/[\/\\]/).pop();
-      let dir = 'files-received/'
       if (isURL) {
+        let dir = 'files-received/'
         await get(req.body.path, {
           directory: 'files-received'
         });
-        let response = await data.client.setGroupPic(number, dir + name)
+
+        let response = await data.client.setProfilePic(number, dir + name)
         fs.unlink(path.basename("/files-received") + "/" + name, erro => console.log(""))
         return res.status(200).json({
           result: 200,
-          "messages": "SUCCESS"
+          type: 'video',
+          session: req.body.session,
+          file: name,
+          data: response
         })
       }
       if (!isURL) {
+
         let response = await data.client.setGroupPic(number, req.body.path)
+
         return res.status(200).json({
           result: 200,
-          "messages": "SUCCESS"
+          type: 'video',
+          session: req.body.session,
+          file: name,
+          data: response
         })
       }
+
     } catch (error) {
-      return res.status(400).json({
-        "result": 400,
-        "status": "FAIL",
-        "log": error
+      return res.status(500).json({
+        result: 500,
+        error: error
       })
     }
   }
