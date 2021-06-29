@@ -90,14 +90,8 @@ Obrigado a essas pessoas maravilhosas
   <tr>
     <td align="center"><a href="https://github.com/billbarsch"><img src="https://avatars0.githubusercontent.com/u/4331821?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Bill Barsh</b></sub></a><br />
     </td>
-    <td align="center"><a href="https://github.com/bgastaldi"><img src="https://avatars2.githubusercontent.com/u/3454381?v=4?s=100" width="100px;" alt=""/><br /><sub><b>LaChapeliere</b></sub></a><br />
-    </td>
     <td align="center"><a href="https://github.com/edupoli"><img src="https://avatars1.githubusercontent.com/u/30879448?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Eduardo Policarpo
 </b></sub></a><br />
-    </td>
-    <td align="center"><a href="https://github.com/lukasabino"><img src="https://avatars0.githubusercontent.com/u/70410692?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Lucas Sabino</b></sub></a><br />
-    </td>
-    <td align="center"><a href="https://github.com/jhowbhz"><img src="https://avatars.githubusercontent.com/u/31408451?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jonathan Henrique</b></sub></a><br />
     </td>
   </tr>
 </table>
