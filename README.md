@@ -64,8 +64,8 @@ nodejs -v
 
 - Clonar do GIT
 
-``` 
-barsh git clone https://github.com/billbarsch/myzap2.0 
+``` barsh 
+git clone https://github.com/billbarsch/myzap2.0 
 ```
 
 ``` barsh 
