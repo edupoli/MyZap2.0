@@ -3,7 +3,7 @@
 # Project: myzap2.0                                                            #
 # Created Date: 2021-06-21 18:41:44                                            #
 # Author: Eduardo Policarpo                                                    #
-# Last Modified: 2021-06-28 00:20:49                                           #
+# Last Modified: 2021-06-28 22:59:11                                           #
 # Modified By: Eduardo Policarpo                                               #
 ##############################################################################*/
 
@@ -86,7 +86,7 @@ module.exports = class Firebase {
 
     static async deleteSession(req, res, next) {
         try {
-            const id = req.body.id;
+            const id = req.body.session;
             if (!id) {
                 res.status(400).send('Session não informada');
             }

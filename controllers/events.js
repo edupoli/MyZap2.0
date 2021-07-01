@@ -19,7 +19,7 @@ module.exports = class Events {
                 let response = []
                 if (message.hasMedia == true || message.type == 'ptt' || message.type == 'document' || message.type == 'video' || message.type == 'image' || message.type == 'sticker') {
                     var buffer = await message.downloadMedia();
-                    var telefone = ((String(`${message.id.remote}`).split('@')[0]).substr(2));
+                    var telefone = ((String(`${message.from}`).split('@')[0]).substr(2));
                     let date_ob = new Date();
                     let date = ("0" + date_ob.getDate()).slice(-2);
                     let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
@@ -263,7 +263,7 @@ module.exports = class Events {
                 let response = []
                 if (message.isMedia === true || message.isMMS === true || message.type == 'document' || message.type == 'ptt' || message.type == 'sticker') {
                     var buffer = await client.decryptFile(message);
-                    var telefone = ((String(`${message.id.remote}`).split('@')[0]).substr(2));
+                    var telefone = ((String(`${message.from}`).split('@')[0]).substr(2));
                     let date_ob = new Date();
                     let date = ("0" + date_ob.getDate()).slice(-2);
                     let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);

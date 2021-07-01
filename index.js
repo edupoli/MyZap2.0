@@ -79,7 +79,9 @@ if (config.https == 1) {
                 console.log(`Http server running on ${config.host}:${config.port}`);
                 if (config.start_all_sessions === 'true') {
                     let result = await startAllSessions()
-                    console.log(result)
+                    if (result != undefined) {
+                        console.log(result)
+                    }
                 }
             }
         });
@@ -97,7 +99,9 @@ if (config.https == 1) {
             console.log(`Http server running on ${config.host}:${config.port}`);
             if (config.start_all_sessions === 'true') {
                 let result = await startAllSessions()
-                console.log(result)
+                if (result != undefined) {
+                    console.log(result)
+                }
             }
         }
     });
