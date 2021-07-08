@@ -3,7 +3,7 @@
 # Project: myzap2.0                                                            #
 # Created Date: 2021-06-27 02:34:00                                            #
 # Author: Eduardo Policarpo                                                    #
-# Last Modified: 2021-06-30 22:58:02                                           #
+# Last Modified: 2021-07-08 08:58:38                                           #
 # Modified By: Eduardo Policarpo                                               #
 ##############################################################################*/
 
@@ -13,8 +13,6 @@ const firebase = require('./firebase/db');
 const firestore = firebase.firestore();
 const request = require('request-promise');
 const config = require('./config');
-const async = require('async');
-
 
 async function getAllSessions() {
     try {

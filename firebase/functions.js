@@ -3,7 +3,7 @@
 # Project: myzap2.0                                                            #
 # Created Date: 2021-06-21 18:41:44                                            #
 # Author: Eduardo Policarpo                                                    #
-# Last Modified: 2021-06-28 22:59:11                                           #
+# Last Modified: 2021-07-06 17:29:46                                           #
 # Modified By: Eduardo Policarpo                                               #
 ##############################################################################*/
 
@@ -26,6 +26,36 @@ module.exports = class Firebase {
     }
 
     static async getAllSessions(req, res, next) {
+        try {
+            const Sessions = await firestore.collection('Sessions');
+            const data = await Sessions.get();
+            const SessionsArray = [];
+            if (data.empty) {
+                res.status(404).send('No Session record found');
+            } else {
+                data.forEach(doc => {
+                    const Session = new SessionsDB(
+                        doc.id,
+                        doc.data().session,
+                        doc.data().wh_status,
+                        doc.data().wh_message,
+                        doc.data().wh_qrcode,
+                        doc.data().wh_connect
+                    );
+                    SessionsArray.push(Session);
+                });
+                res.status(200).json({
+                    result: 200,
+                    "sessions": SessionsArray
+                })
+                res.send(SessionsArray);
+            }
+        } catch (error) {
+            res.status(400).send(error.message);
+        }
+    }
+
+    static async getAllSessionsFulldata(req, res, next) {
         try {
             const Sessions = await firestore.collection('Sessions');
             const data = await Sessions.get();
@@ -88,11 +118,28 @@ module.exports = class Firebase {
         try {
             const id = req.body.session;
             if (!id) {
-                res.status(400).send('Session não informada');
+                res.status(400).json({
+                    result: 400,
+                    "status": "FAIL",
+                    "reason": "Session não informada"
+                })
+            }
+            const Session = await firestore.collection('Sessions').doc(id);
+            const data = await Session.get();
+            if (!data.exists) {
+                res.status(404).json({
+                    result: 404,
+                    "status": "FAIL",
+                    "reason": `Session ${id} não existe no firebase`
+                })
             }
             else {
                 await firestore.collection('Sessions').doc(id).delete();
-                res.send('Record deleted successfuly');
+                res.status(200).json({
+                    result: 200,
+                    "status": "SUCCESS",
+                    "reason": `Session ${id} deletada com sucesso no firebase!!`
+                })
             }
         } catch (error) {
             res.status(400).send(error.message);

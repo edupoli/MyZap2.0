@@ -305,6 +305,32 @@ module.exports = class Group {
     }
   }
 
+  static async changePrivacyGroup(req, res) {
+    try {
+      let data = Sessions.getSession(req.body.session)
+      if (!req.body.groupid) {
+        return res.status(400).json({
+          'result': 'error',
+          'reason': 'Deve ser informado o ID do Grupo'
+        })
+      }
+      else {
+        const g = '@g.us'
+        await data.client.setMessagesAdminsOnly(req.body.groupid + g);
+        return res.status(200).json({
+          "result": 200,
+          "messages": "SUCCESS"
+        })
+      }
+    } catch (error) {
+      return res.status(400).json({
+        "result": 400,
+        "status": "FAIL",
+        "log": error
+      })
+    }
+  }
+
   static async getGroupInviteLink(req, res) {
     try {
       let data = Sessions.getSession(req.body.session)
