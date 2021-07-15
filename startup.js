@@ -3,7 +3,7 @@
 # Project: myzap2.0                                                            #
 # Created Date: 2021-06-27 02:34:00                                            #
 # Author: Eduardo Policarpo                                                    #
-# Last Modified: 2021-07-08 08:58:38                                           #
+# Last Modified: 2021-07-11 00:35:56                                           #
 # Modified By: Eduardo Policarpo                                               #
 ##############################################################################*/
 
@@ -49,30 +49,38 @@ async function getAllSessions() {
 async function startAllSessions() {
     let dados = await getAllSessions()
     if (dados != null) {
-        dados.map((item) => {
-            var options = {
-                'method': 'POST',
-                'json': true,
-                'url': `http://${config.host}:${config.port}/start`,
-                'headers': {
-                    'apitoken': item.apitoken,
-                    'sessionkey': item.sessionkey
-                },
-                body: {
-                    "session": item.session,
-                    "wh_connect": item.wh_connect,
-                    "wh_qrcode": item.wh_qrcode,
-                    "wh_status": item.wh_status,
-                    "wh_message": item.wh_message
-                }
+        if (dados === 'Missing or insufficient permissions.') {
+            console.log('######### ERRO DE CONFIGURACAO NO FIREBASE #########')
+            console.log('####### Missing or insufficient permissions. #######')
+            console.log('### Verifique as permissões de escrita e leitura ###')
+        }
+        else {
+            dados.map((item) => {
+                var options = {
+                    'method': 'POST',
+                    'json': true,
+                    'url': `http://${config.host}:${config.port}/start`,
+                    'headers': {
+                        'apitoken': item.apitoken,
+                        'sessionkey': item.sessionkey
+                    },
+                    body: {
+                        "session": item.session,
+                        "wh_connect": item.wh_connect,
+                        "wh_qrcode": item.wh_qrcode,
+                        "wh_status": item.wh_status,
+                        "wh_message": item.wh_message
+                    }
 
-            };
-            request(options).then(result => {
-                console.log(result)
-            }).catch(error => {
-                console.log(error)
-            })
-        });
+                };
+                request(options).then(result => {
+                    console.log(result)
+                }).catch(error => {
+                    console.log(error)
+                })
+            });
+
+        }
     }
 }
 module.exports.startAllSessions = startAllSessions;
