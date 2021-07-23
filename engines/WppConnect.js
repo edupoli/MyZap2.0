@@ -9,6 +9,7 @@ const Sessions = require('../controllers/sessions');
 const events = require('../controllers/events');
 const webhooks = require('../controllers/webhooks');
 const firebase = require('../firebase/db');
+const config = require('../config');
 const firestore = firebase.firestore();
 module.exports = class Wppconnect {
 
@@ -104,7 +105,9 @@ module.exports = class Wppconnect {
             webhooks.wh_connect(session, 'connected', info.wid.user, browser, tokens)
             events.receiveMessage(session, client)
             events.statusMessage(session, client)
-            events.statusConnection(session, client)
+            if (config.useHere === 'true') {
+                events.statusConnection(session, client)
+            }
             Sessions.addInfoSession(session, {
                 client: client,
                 tokens: tokens

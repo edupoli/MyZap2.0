@@ -104,7 +104,9 @@ module.exports = class Venom {
             webhooks.wh_connect(session, 'connected', info.wid.user, browser, tokens)
             events.receiveMessage(session, client)
             events.statusMessage(session, client)
-            events.statusConnection(session, client)
+            if (config.useHere === 'true') {
+                events.statusConnection(session, client)
+            }
             Sessions.addInfoSession(session, {
                 client: client,
                 tokens: tokens

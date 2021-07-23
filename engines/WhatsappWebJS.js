@@ -14,6 +14,7 @@ const events = require('../controllers/events');
 const webhooks = require('../controllers/webhooks');
 const firebase = require('../firebase/db');
 const firestore = firebase.firestore();
+const config = require('../config');
 
 module.exports = class WhatsappWebJS {
     static async start(req, res, session) {
@@ -21,14 +22,24 @@ module.exports = class WhatsappWebJS {
             try {
                 const Session = await firestore.collection('Sessions').doc(session);
                 const dados = await Session.get();
+                var useHere;
+                if (config.useHere === 'true') {
+                    useHere = false
+                }
+                else {
+                    if (config.useHere != 'true') {
+                        useHere = true
+                    }
+                }
+                console.log(useHere)
                 let client;
                 if (dados.exists) {
                     console.log(`****** STARTING SESSION ${session} ******`)
                     client = new Client({
                         restartOnAuthFail: true,
-                        takeoverOnConflict: false,
+                        takeoverOnConflict: useHere,
                         puppeteer: {
-                            headless: true,
+                            headless: false,
                             args: [
                                 '--no-sandbox',
                                 '--disable-setuid-sandbox',
@@ -65,9 +76,9 @@ module.exports = class WhatsappWebJS {
                     console.log(`****** STARTING SESSION ${session} ******`)
                     client = new Client({
                         restartOnAuthFail: true,
-                        takeoverOnConflict: false,
+                        takeoverOnConflict: useHere,
                         puppeteer: {
-                            headless: true,
+                            headless: false,
                             args: [
                                 '--no-sandbox',
                                 '--disable-setuid-sandbox',
