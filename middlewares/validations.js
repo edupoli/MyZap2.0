@@ -6,10 +6,10 @@
  */
 const Sessions = require('../controllers/sessions')
 require('dotenv').config();
-let engine = process.env.ENGINE;
+let engine = process?.env?.ENGINE;
 
 const checkParams = async (req, res, next) => {
-    let session = req.body.session
+    let session = req?.body?.session
     let data = Sessions.getSession(session)
     if (!session) {
         return res.status(401).json({ error: 'Sessão não informada.' });
@@ -42,7 +42,7 @@ const checkParams = async (req, res, next) => {
             }
         }
         else {
-            const client = await data.client.isConnected();
+            const client = await data?.client?.isConnected();
             if (!client) {
                 return res.status(400).json({
                     response: false,
@@ -59,7 +59,7 @@ const checkParams = async (req, res, next) => {
 //checar se o numero existe no whats ...... isso no whatsappwebjs
 const checkRegisteredNumber = async function (req, res) {
     let data = Sessions.getSession(req.body.session)
-    const isRegistered = await data.client.isRegisteredUser(req.body.number);
+    const isRegistered = await data?.client?.isRegisteredUser(req.body.number);
     return isRegistered;
 }
 
