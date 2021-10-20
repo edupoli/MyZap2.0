@@ -79,7 +79,7 @@ npm install --allow-root --unsafe-perm=true
 ```
 
 ```barsh
-cp env_exemplo .env
+cp .env_exemplo .env
 ```
 
 - Dentro do arquivo .env contem
