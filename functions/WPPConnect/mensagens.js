@@ -204,7 +204,7 @@ module.exports = class Mensagens {
                 })
             }
             if (!isURL) {
-                let response = await data.client.sendFile(number, req.body.path, 'File', req.body.caption)
+                let response = await data.client.sendFile(number, req?.body?.path, req?.body?.fileName || 'File', req?.body?.caption || 'Arquivo')
                 return res.status(200).json({
                     result: 200,
                     type: 'file',
